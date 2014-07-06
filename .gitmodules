@@ -1,0 +1,3 @@
+[submodule "TomP2P"]
+	path = TomP2P
+	url = git@github.com:tomp2p/TomP2P.git
