@@ -1,3 +1,6 @@
 [submodule "TomP2P"]
 	path = TomP2P
 	url = https://github.com/tomp2p/TomP2P.git
+[submodule "bc-java"]
+	path = bc-java
+	url = http://git.bouncycastle.org/repositories/bc-java
