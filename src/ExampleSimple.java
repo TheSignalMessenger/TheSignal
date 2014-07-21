@@ -1,4 +1,7 @@
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.futures.FutureBootstrap; 
 import net.tomp2p.p2p.Peer;
@@ -9,10 +12,14 @@ import net.tomp2p.storage.Data;
 public class ExampleSimple {
 
     final private Peer peer;
+    
+    private int combineIdAndPort(Number160 id, int port) {
+    	return port + id.toIntArray()[0];
+    }
 
-    public ExampleSimple(int peerId) throws Exception {
-        peer = new PeerMaker(Number160.createHash(peerId)).setPorts(4000 + peerId).makeAndListen();
-        FutureBootstrap fb = peer.bootstrap().setBroadcast().setPorts(4001).start();
+    public ExampleSimple(Number160 id, Number160 partnerId) throws Exception {
+        peer = new PeerMaker(id).setPorts(this.combineIdAndPort(id, 4000)).makeAndListen();
+        FutureBootstrap fb = peer.bootstrap().setBroadcast().setPorts(this.combineIdAndPort(partnerId, 4000)).start();
         fb.awaitUninterruptibly();
         if (fb.getBootstrapTo() != null) {
             peer.discover().setPeerAddress(fb.getBootstrapTo().iterator().next()).start().awaitUninterruptibly();
@@ -20,17 +27,34 @@ public class ExampleSimple {
     }
 
     public static void main(String[] args) throws NumberFormatException, Exception {
-        ExampleSimple dns = new ExampleSimple(Integer.parseInt(args[0]));
-        if (args.length == 3) {
-            dns.store(args[1], args[2]);
-        }
-        if (args.length == 2) {
-            System.out.println("Name:" + args[1] + " IP:" + dns.get(args[1]));
-        }
+    	Number160 nodeId = Number160.createHash(args[1]);
+    	final Number160 partnerId = Number160.createHash(args[2]);
+    	final ExampleSimple chat = new ExampleSimple(nodeId, partnerId);
+	
+		Timer receiveTimer = new Timer();
+	    receiveTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					System.console().writer().println(chat.get(partnerId).toString());
+				} catch(Exception e) {
+					System.console().writer().println("konnte nicht lesen");
+				}
+			}
+		}, 0, 1000);
+	    
+    	String input;
+    	do {
+    		input = System.console().readLine();
+    		chat.store(partnerId, input);
+    	}
+    	while(!input.equals(""));
+    	// chat.store(args[1], args[2]);
+        // chat.get(partnerNodeId);
     }
 
-    private String get(String name) throws ClassNotFoundException, IOException {
-        FutureDHT futureDHT = peer.get(Number160.createHash(name)).start();
+    private String get(Number160 location) throws ClassNotFoundException, IOException {
+        FutureDHT futureDHT = peer.get(location).start();
         futureDHT.awaitUninterruptibly();
         if (futureDHT.isSuccess()) {
             return futureDHT.getData().getObject().toString();
@@ -38,7 +62,7 @@ public class ExampleSimple {
         return "not found";
     }
 
-    private void store(String name, String ip) throws IOException {
-        peer.put(Number160.createHash(name)).setData(new Data(ip)).start().awaitUninterruptibly();
+    private void store(Number160 location, String ip) throws IOException {
+        peer.put(location).setData(new Data(ip)).start().awaitUninterruptibly();
     }
 }
