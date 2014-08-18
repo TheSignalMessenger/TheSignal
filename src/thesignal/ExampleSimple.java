@@ -46,14 +46,6 @@ public class ExampleSimple {
 	private Number160 getContentKey = new Number160(0);
 	private Number160 putContentKey = new Number160(0);
 
-	public static Number160 inc(Number160 other) {
-		String otherString = other.toString().substring(2);
-		otherString = otherString.equals("") ? "0" : otherString;
-		String resultString = new BigInteger(otherString, 16).add(
-				new BigInteger("1")).toString(16);
-		return new Number160("0x" + resultString);
-	}
-
 	/**
 	 * Returns a pseudo-random number between 0 and Number160.MAX:VALUE,
 	 * inclusive.
@@ -336,7 +328,7 @@ public class ExampleSimple {
 					}
 					if (value != null) {
 						System.out.println(value);
-						dns.getContentKey = inc(dns.getContentKey);
+						dns.getContentKey = Util.inc(dns.getContentKey);
 					}
 				} while (value != null);
 			}
@@ -356,7 +348,7 @@ public class ExampleSimple {
 				String s = bufferRead.readLine();
 
 				if (dns.store(targetLocation, ownLocation, dns.putContentKey, s)) {
-					dns.putContentKey = inc(dns.putContentKey);
+					dns.putContentKey = Util.inc(dns.putContentKey);
 				} else {
 					System.out.println("Value could not be put");
 					return;
