@@ -1,10 +1,12 @@
 package thesignal;
 
-import java.awt.FlowLayout;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -93,10 +95,12 @@ public class ExampleSimple {
 	}
 
 	public ExampleSimple(int peerId) throws Exception {
-		peer = new PeerMaker(new Number160(peerId)).setPorts(4000)
+		peer = new PeerMaker(Number160.createHash(peerId)).setPorts(4242)
 				.makeAndListen();
-		FutureBootstrap fb = peer.bootstrap().setBroadcast().setPorts(4000)
-				.start();
+		FutureBootstrap fb = peer
+				.bootstrap()
+				.setInetAddress(InetAddress.getByName("user.nullteilerfrei.de"))
+				.setPorts(4242).start();
 		fb.awaitUninterruptibly();
 		if (fb.getBootstrapTo() != null) {
 			peer.discover()
