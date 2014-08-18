@@ -144,20 +144,6 @@ public class ExampleSimple {
 		
 		scrollContainer.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
 
-		// Shell can be used as container
-		Label label = new Label(scrollContainer, SWT.BORDER);
-		label.setText("This is a label:");
-		label.setToolTipText("This is the tooltip of this label");
-
-		final Text text = new Text(scrollContainer, SWT.NONE);
-		text.setText("This is the text in the text widget");
-		text.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
-		text.setForeground(display.getSystemColor(SWT.COLOR_WHITE));
-
-		// set widgets size to their preferred size
-		text.pack();
-		label.pack();
-
 		scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		scroll.setExpandHorizontal(true);
@@ -172,10 +158,11 @@ public class ExampleSimple {
 		inputLayoutData.bottom = new FormAttachment(100, 0);
 		inputContainer.setLayoutData(inputLayoutData);
 
-		Text inputTextField = new Text(inputContainer, SWT.NONE);
-		text.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+		final Text inputTextField = new Text(inputContainer, SWT.NONE);
+		inputTextField.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+		inputTextField.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
 		
-		text.addListener(SWT.KeyDown, new Listener() {
+		inputTextField.addListener(SWT.KeyDown, new Listener() {
 			
 			@Override
 			public void handleEvent(Event event) {
@@ -186,12 +173,12 @@ public class ExampleSimple {
 					Label label = new Label(scrollContainer, SWT.NONE);
 					label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
 					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));;
-					label.setText(text.getText());
-					text.selectAll();
-					text.clearSelection();
+					label.setText(inputTextField.getText());
+					
+					inputTextField.setText("");
 
 					label.pack();
-					
+
 					scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 					scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 					
@@ -200,33 +187,33 @@ public class ExampleSimple {
 			}
 		});
 		
-		text.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				System.out.println("Enter catched");
-				
-				Label label = new Label(scrollContainer, SWT.NONE);
-				label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-				label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));;
-				label.setText(text.getText());
-				text.selectAll();
-				text.clearSelection();
-
-				label.pack();
-				
-				scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-				scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-				
-				scroll.setOrigin(0, scrollContainer.getSize().y);
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
+//		text.addSelectionListener(new SelectionListener() {
+//			
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				System.out.println("Enter catched");
+//				
+//				Label label = new Label(scrollContainer, SWT.NONE);
+//				label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+//				label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));;
+//				label.setText(text.getText());
+//				text.selectAll();
+//				text.clearSelection();
+//
+//				label.pack();
+//				
+//				scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+//				scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+//				
+//				scroll.setOrigin(0, scrollContainer.getSize().y);
+//			}
+//			
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		});
 		
 //		text.addKeyListener(new KeyListener() {
 //			
