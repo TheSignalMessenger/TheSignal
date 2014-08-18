@@ -158,7 +158,7 @@ public class ExampleSimple {
 		inputLayoutData.bottom = new FormAttachment(100, 0);
 		inputContainer.setLayoutData(inputLayoutData);
 
-		final Text inputTextField = new Text(inputContainer, SWT.NONE);
+		final Text inputTextField = new Text(inputContainer, SWT.MULTI | SWT.WRAP | SWT.BORDER);
 		inputTextField.setBackground(display.getSystemColor(SWT.TRANSPARENT));
 		inputTextField.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
 		
@@ -172,8 +172,14 @@ public class ExampleSimple {
 					
 					Label label = new Label(scrollContainer, SWT.NONE);
 					label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));;
-					label.setText(inputTextField.getText());
+					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+
+					String input = inputTextField.getText();
+					// normalize line endings to \n, because \r is not recognized as "end of line"
+					input = input.replace ("/\\s*\\R/g", "\n");
+					// remove leading and trailing whitespace
+					input = input.replace ("/^\\s*|[\\t ]+$/gm", "");
+					label.setText(inputTextField.getText().trim());
 					
 					inputTextField.setText("");
 
