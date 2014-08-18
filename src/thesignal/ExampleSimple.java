@@ -46,14 +46,6 @@ public class ExampleSimple {
 	private Number160 getContentKey = new Number160(0);
 	private Number160 putContentKey = new Number160(0);
 
-	public static Number160 inc(Number160 other) {
-		String otherString = other.toString().substring(2);
-		otherString = otherString.equals("") ? "0" : otherString;
-		String resultString = new BigInteger(otherString, 16).add(
-				new BigInteger("1")).toString(16);
-		return new Number160("0x" + resultString);
-	}
-
 	/**
 	 * Returns a pseudo-random number between 0 and Number160.MAX:VALUE,
 	 * inclusive.
@@ -158,7 +150,7 @@ public class ExampleSimple {
 		inputLayoutData.bottom = new FormAttachment(100, 0);
 		inputContainer.setLayoutData(inputLayoutData);
 
-		final Text inputTextField = new Text(inputContainer, SWT.NONE);
+		final Text inputTextField = new Text(inputContainer, SWT.MULTI | SWT.WRAP | SWT.BORDER);
 		inputTextField.setBackground(display.getSystemColor(SWT.TRANSPARENT));
 		inputTextField.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
 		
@@ -172,8 +164,14 @@ public class ExampleSimple {
 					
 					Label label = new Label(scrollContainer, SWT.NONE);
 					label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));;
-					label.setText(inputTextField.getText());
+					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+
+					String input = inputTextField.getText();
+					// normalize line endings to \n, because \r is not recognized as "end of line"
+					input = input.replace ("/\\s*\\R/g", "\n");
+					// remove leading and trailing whitespace
+					input = input.replace ("/^\\s*|[\\t ]+$/gm", "");
+					label.setText(inputTextField.getText().trim());
 					
 					inputTextField.setText("");
 
