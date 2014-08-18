@@ -21,15 +21,43 @@
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.7</version>
     </dependency>
-    <dependency>
-      <groupId>org.eclipse.swt</groupId>
-      <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
-      <version>4.4</version>
-    </dependency>
   </dependencies>
-  <groupId>TestTomP2P</groupId>
-  <artifactId>TestTomP2P</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <profiles>
+    <profile>
+      <id>Windows64</id>
+      <activation>
+        <os>
+          <family>Windows</family>
+        </os>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+          <version>4.4</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>Linux64</id>
+      <activation>
+        <os>
+          <family>Linux</family>
+          <arch>x64</arch>
+        </os>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.eclipse.swt</groupId>
+          <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+          <version>4.4</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+  <groupId>TheSignal</groupId>
+  <artifactId>TheSignal</artifactId>
+  <version>0.1-ALPHA</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
