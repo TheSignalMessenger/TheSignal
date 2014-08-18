@@ -1,4 +1,4 @@
-package utils;
+package thesignal.utils;
 
 import java.math.BigInteger;
 
