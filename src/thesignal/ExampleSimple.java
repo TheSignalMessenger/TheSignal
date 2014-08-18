@@ -330,7 +330,7 @@ public class ExampleSimple {
 					}
 					if (value != null) {
 						System.out.println(value);
-						dns.getContentKey = inc(dns.getContentKey);
+						dns.getContentKey = Util.inc(dns.getContentKey);
 					}
 				} while (value != null);
 			}
@@ -350,7 +350,7 @@ public class ExampleSimple {
 				String s = bufferRead.readLine();
 
 				if (dns.store(targetLocation, ownLocation, dns.putContentKey, s)) {
-					dns.putContentKey = inc(dns.putContentKey);
+					dns.putContentKey = Util.inc(dns.putContentKey);
 				} else {
 					System.out.println("Value could not be put");
 					return;
