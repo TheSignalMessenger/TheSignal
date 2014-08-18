@@ -55,9 +55,9 @@
       </dependencies>
     </profile>
   </profiles>
-  <groupId>TestTomP2P</groupId>
-  <artifactId>TestTomP2P</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <groupId>TheSignal</groupId>
+  <artifactId>TheSignal</artifactId>
+  <version>0.1-ALPHA</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
