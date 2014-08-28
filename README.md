@@ -10,3 +10,11 @@ h1. TheSignal source
 * "Next" "Finish"
 * Right click on Project, "Configure", "Convert to Maven project"
 * Right click on Project, "Maven", "Update"
+
+h1. Deployment
+* In eclipse
+* Right click on project
+* Export
+* Java -> Runnable JAR file
+* select correct launch configuration
+* Extract required libraries into generated JAR
