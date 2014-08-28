@@ -31,4 +31,3 @@ public class ConsoleClient {
 		final ConsoleClient dns = new ConsoleClient(args[0]);
 	}
 }
-
