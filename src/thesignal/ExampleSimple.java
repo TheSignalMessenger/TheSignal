@@ -93,6 +93,7 @@ public class ExampleSimple {
 	}
 
 	public ExampleSimple(Number160 peerHash) throws Exception {
+		// TODO: This was just a quick hack to be able to start the ExampleSimple multiple times on the same machine (apparently that can't be done with the same port)
 		peer = new PeerMaker(peerHash).setPorts(4000 + Math.round(new Random(System.currentTimeMillis()).nextFloat() * 200.f))
 				.makeAndListen();
 		FutureBootstrap fb = peer
