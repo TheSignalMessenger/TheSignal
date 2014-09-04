@@ -45,8 +45,6 @@ public class ExampleSimple {
 	public final static Preferences prefs = Preferences.userRoot().node(nodeName);
 	
 	final private Peer peer;
-	private Number160 getContentKey = new Number160(0);
-	private Number160 putContentKey = new Number160(0);
 
 	/**
 	 * Returns a pseudo-random number between 0 and Number160.MAX:VALUE,
