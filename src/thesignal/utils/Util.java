@@ -63,4 +63,21 @@ public final class Util {
 
 		return randomNum;
 	}
+
+	public static boolean less(Number160 left, Number160 right) {
+		String leftString = left.toString();
+		String rightString = right.toString();
+		if(leftString.length() < rightString.length())
+		{
+			return true;
+		}
+		else
+		{
+			return leftString.compareTo(rightString) < 0;
+		}
+	}
+
+	public static boolean greater(Number160 left, Number160 right) {
+		return less(right, left);
+	}
 }
