@@ -3,8 +3,10 @@ package thesignal;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.prefs.Preferences;
@@ -128,6 +130,12 @@ public class ExampleSimple {
 		final String prefKeyKnownPeers = "known_peers";
 		Preferences prefKnownPeers = prefs.node(prefKeyKnownPeers);
 		
+		final String prefKeyNextGetContentKeys = "next_get_content_keys";
+		final Preferences prefNextGetContentKeys = prefs.node(prefKeyNextGetContentKeys);
+
+		final String prefKeyNextPutContentKeys = "next_put_content_keys";
+		final Preferences prefNextPutContentKeys = prefs.node(prefKeyNextPutContentKeys);
+
 		for(int i = 1; i < args.length; ++i)
 		{
 			if(prefKnownPeers.get(args[i], "").isEmpty())
@@ -140,7 +148,19 @@ public class ExampleSimple {
 		final HashMap<String, Pair<Number160, Pair<Number160, Number160>>> knownPeers = new HashMap<String, Pair<Number160, Pair<Number160, Number160>>>(prefKnownPeers.keys().length);
 		for(String peer : prefKnownPeers.keys())
 		{
-			knownPeers.put(peer, new Pair<Number160, Pair<Number160, Number160>>(new Number160(prefKnownPeers.get(peer, "")), new Pair(new Number160(0), new Number160(0))));
+			Number160 peerHash = new Number160(prefKnownPeers.get(peer, ""));
+			
+			// TODO: The following two calls almost always return nothing else than 0 since it is way too early and the DHT values haven't been pushed, yet.
+			Number160 nextPeerPutContentKey = dns.getNextContentKey(peerHash, ownLocation);
+			Number160 nextPeerGetContentKey = dns.getNextContentKey(ownLocation, peerHash);
+			
+			nextPeerPutContentKey = new Number160(prefNextPutContentKeys.get(peer, nextPeerPutContentKey.toString()));
+			nextPeerGetContentKey = new Number160(prefNextGetContentKeys.get(peer, nextPeerGetContentKey.toString()));
+			
+			System.out.println("Next put contentKey for peer " + peer + " is " + nextPeerPutContentKey.toString());
+			System.out.println("Next get contentKey for peer " + peer + " is " + nextPeerGetContentKey.toString());
+			
+			knownPeers.put(peer, new Pair<Number160, Pair<Number160, Number160>>(peerHash, new Pair<Number160, Number160>(nextPeerGetContentKey, nextPeerPutContentKey)));
 		}
 		
 		final Display display = new Display();
@@ -256,7 +276,9 @@ public class ExampleSimple {
 							Pair<Number160, Pair<Number160, Number160>> pair = knownPeers.get(recipient);
 							try {
 								if (dns.store(pair.first, ownLocation, pair.second.second, input)) {
+									System.out.println("Put " + input + " at content key " + pair.second.second.toString() + " for peer " + recipient);
 									pair.second.second = Util.inc(pair.second.second);
+									prefNextPutContentKeys.put(recipient, pair.second.second.toString());
 								}
 							} catch (IOException e) {
 								e.printStackTrace();
@@ -340,8 +362,9 @@ public class ExampleSimple {
 					String value = null;
 					Pair<Number160, Pair<Number160, Number160>> pair = knownPeer.getValue();
 					do {
-						
+						value = null;
 						try {
+							System.out.println("Polling content key " + pair.second.first.toString() + " for peer " + knownPeer.getKey());
 							value = dns.get(ownLocation, pair.first,
 									pair.second.first);
 						} catch (ClassNotFoundException e) {
@@ -375,6 +398,7 @@ public class ExampleSimple {
 							});
 
 							pair.second.first = Util.inc(pair.second.first);
+							prefNextGetContentKeys.put(knownPeer.getKey(), pair.second.first.toString());
 						}
 					} while (value != null);
 				}
@@ -391,8 +415,16 @@ public class ExampleSimple {
 			}
 		}
 
+		timer.cancel();
 		// disposes all associated windows and their components
 		display.dispose();
+		
+		prefNextGetContentKeys.flush();
+		prefNextPutContentKeys.flush();
+		
+		System.out.println("Finished everything and flushed the preferences!");
+		
+		System.exit(0);
 	}
 
 	private String get(Number160 location, Number160 domain,
@@ -412,4 +444,22 @@ public class ExampleSimple {
 				.setDomainKey(domain).start().awaitUninterruptibly();
 		return fut.isSuccess();
 	}
+
+	private Number160 getNextContentKey(Number160 location, Number160 domain) throws ClassNotFoundException, IOException {
+		FutureDHT futureDHT = peer.get(location).setDomainKey(domain).start();
+		futureDHT.awaitUninterruptibly();
+		Number160 retVal = new Number160(0);
+		if (futureDHT.isSuccess()) {
+			Set<Number160> contentKeys = futureDHT.getDataMap().keySet();
+			for(Number160 contentKey : contentKeys)
+			{
+				if(!Util.less(contentKey, retVal))
+				{
+					retVal = Util.inc(contentKey);
+				}
+			}
+		}
+		return retVal;
+	}
+
 }
