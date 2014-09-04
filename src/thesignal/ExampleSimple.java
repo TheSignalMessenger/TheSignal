@@ -110,6 +110,18 @@ public class ExampleSimple {
 	
 	public static void main(String[] args) throws NumberFormatException,
 			Exception {
+//		// Test code for Util.less...
+//		Random rand = new Random(System.currentTimeMillis());
+//		for(int i = 0; i < 50; ++i)
+//		{
+//			int left = rand.nextInt(Integer.MAX_VALUE);
+//			int right = rand.nextInt(Integer.MAX_VALUE);
+//			boolean test = Util.less(new Number160(left), new Number160(right));
+//			
+//			System.out.println(left + (test?"<":">"));
+//			System.out.println(right);
+//		}
+
 		final Number160 ownLocation = Number160.createHash(args[0]);
 		final ExampleSimple dns = new ExampleSimple(ownLocation);
 
