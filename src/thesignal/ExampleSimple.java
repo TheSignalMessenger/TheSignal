@@ -1,25 +1,19 @@
 package thesignal;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.math.BigInteger;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.prefs.Preferences;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -32,8 +26,11 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import thesignal.utils.Pair;
 import thesignal.utils.Util;
 import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.futures.FutureBootstrap;
@@ -43,7 +40,10 @@ import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
 public class ExampleSimple {
-
+	final static String nodeName = "/the/signal";
+	
+	public final static Preferences prefs = Preferences.userRoot().node(nodeName);
+	
 	final private Peer peer;
 	private Number160 getContentKey = new Number160(0);
 	private Number160 putContentKey = new Number160(0);
@@ -94,13 +94,13 @@ public class ExampleSimple {
 		return randomNum;
 	}
 
-	public ExampleSimple(int peerId) throws Exception {
-		peer = new PeerMaker(Number160.createHash(peerId)).setPorts(4242)
+	public ExampleSimple(Number160 peerHash) throws Exception {
+		peer = new PeerMaker(peerHash).setPorts(4000 + Math.round(new Random(System.currentTimeMillis()).nextFloat() * 200.f))
 				.makeAndListen();
 		FutureBootstrap fb = peer
 				.bootstrap()
 				.setInetAddress(InetAddress.getByName("user.nullteilerfrei.de"))
-				.setPorts(4242).start();
+				.setPorts(4001).start();
 		fb.awaitUninterruptibly();
 		if (fb.getBootstrapTo() != null) {
 			peer.discover()
@@ -108,9 +108,30 @@ public class ExampleSimple {
 					.start().awaitUninterruptibly();
 		}
 	}
-
+	
 	public static void main(String[] args) throws NumberFormatException,
 			Exception {
+		final Number160 ownLocation = Number160.createHash(args[0]);
+		final ExampleSimple dns = new ExampleSimple(ownLocation);
+
+		final String prefKeyKnownPeers = "known_peers";
+		Preferences prefKnownPeers = prefs.node(prefKeyKnownPeers);
+		
+		for(int i = 1; i < args.length; ++i)
+		{
+			if(prefKnownPeers.get(args[i], "").isEmpty())
+			{
+				prefKnownPeers.put(args[i], Number160.createHash(args[i]).toString());
+			}
+		}
+		prefKnownPeers.flush();
+		
+		final HashMap<String, Pair<Number160, Pair<Number160, Number160>>> knownPeers = new HashMap<String, Pair<Number160, Pair<Number160, Number160>>>(prefKnownPeers.keys().length);
+		for(String peer : prefKnownPeers.keys())
+		{
+			knownPeers.put(peer, new Pair<Number160, Pair<Number160, Number160>>(new Number160(prefKnownPeers.get(peer, "")), new Pair(new Number160(0), new Number160(0))));
+		}
+		
 		final Display display = new Display();
 		final Shell shell = new Shell(display);
 
@@ -123,6 +144,7 @@ public class ExampleSimple {
 				| SWT.VERTICAL);
 		final Composite scrollContainer = new Composite(scroll, SWT.NONE);
 		final Composite inputContainer = new Composite(shell, SWT.NONE);
+		final Table groupList = new Table(shell, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
 
 		RowLayout scrollLayout = new RowLayout(SWT.VERTICAL);
 //		scrollLayout.justify = true;
@@ -134,7 +156,7 @@ public class ExampleSimple {
 		FormData scrollLayoutData = new FormData();
 		scrollLayoutData.top = new FormAttachment(0,0);
 		scrollLayoutData.left = new FormAttachment(0,0);
-		scrollLayoutData.right = new FormAttachment(100, 0);
+		scrollLayoutData.right = new FormAttachment(100, -180);
 		scrollLayoutData.bottom = new FormAttachment(inputContainer, 0);
 		scroll.setLayoutData(scrollLayoutData);
 		
@@ -147,6 +169,41 @@ public class ExampleSimple {
 		scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		inputContainer.setLayout(new FormLayout());
+		
+		FormData groupListLayoutData = new FormData();
+		groupListLayoutData.top = new FormAttachment(0,0);
+		groupListLayoutData.left = new FormAttachment(scroll,0);
+		groupListLayoutData.right = new FormAttachment(100, 0);
+		groupListLayoutData.bottom = new FormAttachment(inputContainer, 0);
+		groupList.setLayoutData(groupListLayoutData);
+		groupList.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+		groupList.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for(int i = 0 ; i < groupList.getItemCount(); ++i)
+				{
+					TableItem item = groupList.getItem(i);
+					if(item.equals(e.item))
+					{
+//		                item.setForeground(display.getSystemColor(SWT.COLOR_RED));
+		                item.setBackground(display.getSystemColor(SWT.COLOR_GRAY));
+					}
+					else
+					{
+						item.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+						item.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+					}
+				}
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+	            TableItem[] selItems = groupList.getSelection();
+	            
+				System.out.println(selItems.toString() + " selected");
+			}
+		});
 
 		FormData inputLayoutData = new FormData();
 		inputLayoutData.left = new FormAttachment(0,0);
@@ -166,20 +223,41 @@ public class ExampleSimple {
 				{
 					System.out.println("Enter catched");
 					
-					Label label = new Label(scrollContainer, SWT.NONE);
-					label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
-
 					String input = inputTextField.getText();
 					// normalize line endings to \n, because \r is not recognized as "end of line"
 					input = input.replace ("/\\s*\\R/g", "\n");
 					// remove leading and trailing whitespace
 					input = input.replace ("/^\\s*|[\\t ]+$/gm", "");
-					label.setText(inputTextField.getText().trim());
 					
-					inputTextField.setText("");
+					input = input.trim();
+					
+					if(!input.isEmpty())
+					{
+						String recipient = "no recipient";
+						
+						Label label = new Label(scrollContainer, SWT.NONE);
+						label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+						label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
 
-					label.pack();
+						if(groupList.getSelection().length == 1)
+						{
+							recipient = groupList.getSelection()[0].getText();
+							Pair<Number160, Pair<Number160, Number160>> pair = knownPeers.get(recipient);
+							try {
+								if (dns.store(pair.first, ownLocation, pair.second.second, input)) {
+									pair.second.second = Util.inc(pair.second.second);
+								}
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+						
+						label.setText("To " + recipient + ": " + input);
+
+						label.pack();
+					}
+
+					inputTextField.setText("");
 
 					scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 					scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -189,64 +267,17 @@ public class ExampleSimple {
 			}
 		});
 		
-//		text.addSelectionListener(new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				System.out.println("Enter catched");
-//				
-//				Label label = new Label(scrollContainer, SWT.NONE);
-//				label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-//				label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));;
-//				label.setText(text.getText());
-//				text.selectAll();
-//				text.clearSelection();
-//
-//				label.pack();
-//				
-//				scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-//				scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-//				
-//				scroll.setOrigin(0, scrollContainer.getSize().y);
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
+		for(String peer : knownPeers.keySet())
+		{
+			if(!peer.equals(args[0]))
+			{
+				TableItem tableItem = new TableItem(groupList, SWT.NONE);
+				tableItem.setText(peer);
+				tableItem.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+			}
+		}
 		
-//		text.addKeyListener(new KeyListener() {
-//			
-//			@Override
-//			public void keyReleased(KeyEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//			
-//			@Override
-//			public void keyPressed(KeyEvent e) {
-//				if(e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR)
-//				{
-//					System.out.println("Enter catched");
-//					
-//					Label label = new Label(scrollContainer, SWT.NONE);
-//					label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-//					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));;
-//					label.setText(text.getText());
-//					text.selectAll();
-//					text.clearSelection();
-//
-//					label.pack();
-//					
-//					scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-//					scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-//					
-//					scroll.setOrigin(0, scrollContainer.getSize().y);
-//				}
-//			}
-//		});
+		groupList.select(0);
 		
 		Button button = new Button(inputContainer, SWT.PUSH);
 		button.setText("send");
@@ -287,6 +318,57 @@ public class ExampleSimple {
 		});
 
 		shell.open();
+//
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+
+			@Override
+			public void run() {
+				for (final Map.Entry<String, Pair<Number160, Pair<Number160, Number160>>> knownPeer : knownPeers
+						.entrySet()) {
+					String value = null;
+					Pair<Number160, Pair<Number160, Number160>> pair = knownPeer.getValue();
+					do {
+						
+						try {
+							value = dns.get(ownLocation, pair.first,
+									pair.second.first);
+						} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if (value != null) {
+							System.out.println(value);
+							final String newLabelText = knownPeer.getKey() + ": " + value;
+							
+							display.syncExec(new Runnable() {
+								
+								@Override
+								public void run() {
+									Label label = new Label(scrollContainer, SWT.NONE);
+									label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+									label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+
+									label.setText(newLabelText);
+									
+									label.pack();
+
+									scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+									scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+									
+									scroll.setOrigin(0, scrollContainer.getSize().y);
+								}
+							});
+
+							pair.second.first = Util.inc(pair.second.first);
+						}
+					} while (value != null);
+				}
+			}
+		}, 0, 1000);
 
 		// run the event loop as long as the window is open
 		while (!shell.isDisposed()) {
@@ -300,88 +382,15 @@ public class ExampleSimple {
 
 		// disposes all associated windows and their components
 		display.dispose();
-		// int peerId = randInt(0, 10000);
-		// ExampleSimple dns = new ExampleSimple(peerId);
-		Util.add(new Number160(4), new Number160(5437856));
-		Util.inc(new Number160(78));
-
-		final ExampleSimple dns = new ExampleSimple(Integer.parseInt(args[0]));
-
-		// Number160 getContentKey = new Number160(Number160.MAX_VALUE / )
-		//
-		final Number160 ownLocation = new Number160(Integer.valueOf(args[0]));
-		final Number160 targetLocation = new Number160(Integer.valueOf(args[1]));
-
-		Timer timer = new Timer();
-		timer.schedule(new TimerTask() {
-
-			@Override
-			public void run() {
-				String value = null;
-				do {
-
-					try {
-						value = dns.get(ownLocation, targetLocation,
-								dns.getContentKey);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					if (value != null) {
-						System.out.println(value);
-						dns.getContentKey = Util.inc(dns.getContentKey);
-					}
-				} while (value != null);
-			}
-		}, 0, 1000);
-
-		// if (args.length == 3) {
-		// dns.store(targetLocation, ownLocation, new Number160(0), args[2]);
-		// }
-		// if (args.length == 2) {
-		// dns.get(ownLocation, targetLocation, new Number160(0));
-		// }
-
-		for (;;) {
-			try {
-				BufferedReader bufferRead = new BufferedReader(
-						new InputStreamReader(System.in));
-				String s = bufferRead.readLine();
-
-				if (dns.store(targetLocation, ownLocation, dns.putContentKey, s)) {
-					dns.putContentKey = Util.inc(dns.putContentKey);
-				} else {
-					System.out.println("Value could not be put");
-					return;
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		//
-		// System.out.println("Enter something here : ");
-
 	}
 
 	private String get(Number160 location, Number160 domain,
 			Number160 contentKey) throws ClassNotFoundException, IOException {
 		FutureDHT futureDHT = peer.get(location).setDomainKey(domain)
 				.setContentKey(contentKey).start();
-		// FutureDHT futureDHT =
-		// peer.get(location).setDomainKey(domain).setContentKey(contentKey).start();
 		futureDHT.awaitUninterruptibly();
 		if (futureDHT.isSuccess()) {
 			return futureDHT.getData().getObject().toString();
-			// for(Number160 key: futureDHT.getDataMap().keySet())
-			// {
-			// System.out.println("key: " + key.toString() + " - value: " +
-			// futureDHT.getDataMap().get(key).getObject().toString());
-			// }
-			// return futureDHT.getData().getObject().toString();
 		}
 		return null;
 	}
