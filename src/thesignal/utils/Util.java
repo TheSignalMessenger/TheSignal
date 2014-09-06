@@ -71,6 +71,10 @@ public final class Util {
 		{
 			return true;
 		}
+		else if(leftString.length() > rightString.length())
+		{
+			return false;
+		}
 		else
 		{
 			return leftString.compareTo(rightString) < 0;
