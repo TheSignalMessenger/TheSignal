@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Text;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.TreeMultimap;
 
+import thesignal.utils.Pair;
 import thesignal.utils.Util;
 import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.futures.FutureBootstrap;
@@ -123,10 +124,14 @@ public class ExampleSimple {
 	
 	private static class TSPeer
 	{
+		static final int putCode = 0;
+		static final int getCode = 1;
+		
 		final String name;
 		final Number160 peerHash;
-		final private TreeMultimap<Long, Number160> dataDates = TreeMultimap.create();
+		final private TreeMultimap<Long, Pair<Integer, Number160>> dataDates = TreeMultimap.create();
 		final private HashMap<Number160, Data> receivedData = new HashMap<Number160, Data>();
+		final private HashMap<Number160, Data> putData = new HashMap<Number160, Data>();
 		Number160 nextPutContentKey = new Number160(0);
 		
 		TSPeer(String name)
@@ -135,13 +140,28 @@ public class ExampleSimple {
 			peerHash = Number160.createHash(name);
 		}
 		
-		void addNewData(Map<Number160, Data> newData)
+		void addNewReceivedData(Map<Number160, Data> newData)
 		{
-			for(Map.Entry<Number160, Data> entry : newData.entrySet())
+			if(newData != null)
 			{
-				dataDates.put(entry.getValue().getCreated(), entry.getKey());
+				for(Map.Entry<Number160, Data> entry : newData.entrySet())
+				{
+					dataDates.put(entry.getValue().getCreated(), new Pair<Integer, Number160>(getCode, entry.getKey()));
+				}
+				receivedData.putAll(newData);
 			}
-			receivedData.putAll(newData);
+		}
+		
+		void addNewPutData(Map<Number160, Data> newData)
+		{
+			if(newData != null)
+			{
+				for(Map.Entry<Number160, Data> entry : newData.entrySet())
+				{
+					dataDates.put(entry.getValue().getCreated(), new Pair<Integer, Number160>(putCode, entry.getKey()));
+				}
+				putData.putAll(newData);
+			}
 		}
 		
 		Map<Number160, Data> getReceivedData()
@@ -149,7 +169,12 @@ public class ExampleSimple {
 			return Collections.unmodifiableMap(receivedData); 
 		}
 		
-		ImmutableMultimap<Long, Number160> getDataDates()
+		Map<Number160, Data> getPutData()
+		{
+			return Collections.unmodifiableMap(putData); 
+		}
+		
+		ImmutableMultimap<Long, Pair<Integer, Number160>> getDataDates()
 		{
 			return ImmutableMultimap.copyOf(dataDates);
 		}
@@ -175,9 +200,6 @@ public class ExampleSimple {
 		final String prefKeyKnownPeers = "known_peers";
 		Preferences prefKnownPeers = prefs.node(prefKeyKnownPeers);
 		
-		final String prefKeyNextGetContentKeys = "next_get_content_keys";
-		final Preferences prefNextGetContentKeys = prefs.node(prefKeyNextGetContentKeys);
-
 		final String prefKeyNextPutContentKeys = "next_put_content_keys";
 		final Preferences prefNextPutContentKeys = prefs.node(prefKeyNextPutContentKeys);
 
@@ -200,6 +222,8 @@ public class ExampleSimple {
 			peer.nextPutContentKey = new Number160(prefNextPutContentKeys.get(peerName, peer.nextPutContentKey.toString()));
 			
 			System.out.println("Next put contentKey for peer " + peer + " is " + peer.nextPutContentKey.toString());
+			
+			peer.addNewPutData(dns.getPutData(peer));
 			
 			knownPeers.put(peerName, peer);
 		}
@@ -278,15 +302,26 @@ public class ExampleSimple {
 					control.dispose();
 				}
 				
-				ImmutableMultimap<Long, Number160> dataDates = knownPeers.get(peerName).getDataDates();
+				ImmutableMultimap<Long, Pair<Integer, Number160>> dataDates = knownPeers.get(peerName).getDataDates();
 				Map<Number160, Data> receivedData = knownPeers.get(peerName).getReceivedData();
-				for(Map.Entry<Long, Number160> entry : dataDates.entries())
+				Map<Number160, Data> putData = knownPeers.get(peerName).getPutData();
+				for(Map.Entry<Long, Pair<Integer, Number160>> entry : dataDates.entries())
 				{
+					int dataCode = entry.getValue().first;
+					Number160 contentKey = entry.getValue().second;
 					Label label = new Label(scrollContainer, SWT.NONE);
 					label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));;
-					label.setText(dns.generateReceivedMessageString(knownPeers.get(peerName), receivedData.get(entry.getValue())));
-
+					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+					Data data = null;
+					String labelText = "";
+					if(dataCode == TSPeer.getCode) {
+						data = receivedData.get(contentKey);
+						labelText = dns.generateReceivedMessageString(knownPeers.get(peerName), data);
+					} else if(dataCode == TSPeer.putCode) {
+						data = putData.get(contentKey);
+						labelText = dns.generatePutMessageString(args[0], data);
+					}
+					label.setText(labelText);
 					label.pack();
 				}
 				
@@ -349,6 +384,9 @@ public class ExampleSimple {
 								putDHT = dns.store(peer.peerHash, ownLocation, peer.nextPutContentKey, input);
 								if(putDHT.isSuccess()) {
 									System.out.println("Put " + input + " at content key " + peer.nextPutContentKey.toString() + " for peer " + recipient);
+									HashMap<Number160, Data> map = new HashMap<Number160, Data>();
+									map.put(peer.nextPutContentKey, new Data(input));
+									peer.addNewPutData(map);
 									peer.nextPutContentKey = Util.inc(peer.nextPutContentKey);
 									prefNextPutContentKeys.put(recipient, peer.nextPutContentKey.toString());
 								}
@@ -442,6 +480,10 @@ public class ExampleSimple {
 				for (final Map.Entry<String, TSPeer> knownPeer : knownPeers.entrySet()) {
 					Map<Number160, Data> newData = null;
 					TSPeer peer = knownPeer.getValue();
+					if(peer.peerHash.equals(ownLocation))
+					{
+						continue;
+					}
 					System.out.println("Polling for peer " + knownPeer.getKey());
 					newData = dns.getNewData(peer);
 					if (newData != null) {
@@ -479,7 +521,7 @@ public class ExampleSimple {
 								}
 							});
 						}
-						peer.addNewData(newData);
+						peer.addNewReceivedData(newData);
 					}
 				}
 			}
@@ -499,7 +541,6 @@ public class ExampleSimple {
 		// disposes all associated windows and their components
 		display.dispose();
 		
-		prefNextGetContentKeys.flush();
 		prefNextPutContentKeys.flush();
 		
 		System.out.println("Finished everything and flushed the preferences!");
@@ -540,6 +581,21 @@ public class ExampleSimple {
 		return newData;
 	}
 	
+	private Map<Number160, Data> getPutData(TSPeer peer)
+	{
+		FutureDHT futureDHT = tomP2PPeer.get(peer.peerHash).setDomainKey(ownLocation).setAll(true).start();
+		futureDHT.awaitUninterruptibly();
+		Map<Number160, Data> newData = null;
+		if (futureDHT.isSuccess()) {
+			newData = futureDHT.getDataMap();
+			for(Number160 contentKey : peer.putData.keySet())
+			{
+				newData.remove(contentKey);
+			}
+		}
+		return newData;
+	}
+	
 	private Number160 getNextContentKey(Number160 location, Number160 domain) {
 		System.out.println("Looking for the highest contentKey in location " + location.toString() + " and domain " + domain.toString());
 		FutureDHT futureDHT = tomP2PPeer.get(location).setDomainKey(domain).setAll(true).start();
@@ -564,6 +620,20 @@ public class ExampleSimple {
 	{
 		try {
 			return Util.getLocaleFormattedCreationDateTimeString(data) + " - " + peer.name + ": " + data.getObject().toString();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "";
+	}
+
+	public String generatePutMessageString(String ownName, Data data)
+	{
+		try {
+			return Util.getLocaleFormattedCreationDateTimeString(data) + " - " + ownName + ": " + data.getObject().toString();
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
