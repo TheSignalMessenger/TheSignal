@@ -2,8 +2,10 @@ package thesignal;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -32,7 +34,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import thesignal.utils.Pair;
 import thesignal.utils.Util;
 import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.futures.FutureBootstrap;
@@ -46,7 +47,8 @@ public class ExampleSimple {
 	
 	public final static Preferences prefs = Preferences.userRoot().node(nodeName);
 	
-	final private Peer peer;
+	final private Peer tomP2PPeer;
+	final private Number160 ownLocation;
 
 	/**
 	 * Returns a pseudo-random number between 0 and Number160.MAX:VALUE,
@@ -95,18 +97,37 @@ public class ExampleSimple {
 	}
 
 	public ExampleSimple(Number160 peerHash) throws Exception {
+		ownLocation = peerHash;
 		// TODO: This was just a quick hack to be able to start the ExampleSimple multiple times on the same machine (apparently that can't be done with the same port)
-		peer = new PeerMaker(peerHash).setPorts(4000 + Math.round(new Random(System.currentTimeMillis()).nextFloat() * 200.f))
+		tomP2PPeer = new PeerMaker(peerHash).setPorts(4000 + Math.round(new Random(System.currentTimeMillis()).nextFloat() * 200.f))
 				.makeAndListen();
-		FutureBootstrap fb = peer
+		FutureBootstrap fb = tomP2PPeer
 				.bootstrap()
 				.setInetAddress(InetAddress.getByName("user.nullteilerfrei.de"))
 				.setPorts(4001).start();
+//		FutureBootstrap fb = tomP2P
+//				.bootstrap()
+//				.setInetAddress(InetAddress.getByName("tsp.no-ip.org"))
+//				.setPorts(4242).start();
 		fb.awaitUninterruptibly();
 		if (fb.getBootstrapTo() != null) {
-			peer.discover()
+			tomP2PPeer.discover()
 					.setPeerAddress(fb.getBootstrapTo().iterator().next())
 					.start().awaitUninterruptibly();
+		}
+	}
+	
+	private static class TSPeer
+	{
+		final String name;
+		final Number160 peerHash;
+		HashMap<Number160, Data> receivedData = new HashMap<Number160, Data>();
+		Number160 nextPutContentKey = new Number160(0);
+		
+		TSPeer(String name)
+		{
+			this.name = name;
+			peerHash = Number160.createHash(name);
 		}
 	}
 	
@@ -145,22 +166,18 @@ public class ExampleSimple {
 		}
 		prefKnownPeers.flush();
 		
-		final HashMap<String, Pair<Number160, Pair<Number160, Number160>>> knownPeers = new HashMap<String, Pair<Number160, Pair<Number160, Number160>>>(prefKnownPeers.keys().length);
-		for(String peer : prefKnownPeers.keys())
+		final HashMap<String, TSPeer> knownPeers = new HashMap<String, TSPeer>(prefKnownPeers.keys().length);
+		for(String peerName : prefKnownPeers.keys())
 		{
-			Number160 peerHash = new Number160(prefKnownPeers.get(peer, ""));
+			TSPeer peer = new TSPeer(peerName);
 			
-			// TODO: The following two calls almost always return nothing else than 0 since it is way too early and the DHT values haven't been pushed, yet.
-			Number160 nextPeerPutContentKey = dns.getNextContentKey(peerHash, ownLocation);
-			Number160 nextPeerGetContentKey = dns.getNextContentKey(ownLocation, peerHash);
+			peer.nextPutContentKey = dns.getNextContentKey(peer.peerHash, ownLocation);
 			
-			nextPeerPutContentKey = new Number160(prefNextPutContentKeys.get(peer, nextPeerPutContentKey.toString()));
-			nextPeerGetContentKey = new Number160(prefNextGetContentKeys.get(peer, nextPeerGetContentKey.toString()));
+			peer.nextPutContentKey = new Number160(prefNextPutContentKeys.get(peerName, peer.nextPutContentKey.toString()));
 			
-			System.out.println("Next put contentKey for peer " + peer + " is " + nextPeerPutContentKey.toString());
-			System.out.println("Next get contentKey for peer " + peer + " is " + nextPeerGetContentKey.toString());
+			System.out.println("Next put contentKey for peer " + peer + " is " + peer.nextPutContentKey.toString());
 			
-			knownPeers.put(peer, new Pair<Number160, Pair<Number160, Number160>>(peerHash, new Pair<Number160, Number160>(nextPeerGetContentKey, nextPeerPutContentKey)));
+			knownPeers.put(peerName, peer);
 		}
 		
 		final Display display = new Display();
@@ -273,12 +290,12 @@ public class ExampleSimple {
 						if(groupList.getSelection().length == 1)
 						{
 							recipient = groupList.getSelection()[0].getText();
-							Pair<Number160, Pair<Number160, Number160>> pair = knownPeers.get(recipient);
+							TSPeer peer = knownPeers.get(recipient);
 							try {
-								if (dns.store(pair.first, ownLocation, pair.second.second, input)) {
-									System.out.println("Put " + input + " at content key " + pair.second.second.toString() + " for peer " + recipient);
-									pair.second.second = Util.inc(pair.second.second);
-									prefNextPutContentKeys.put(recipient, pair.second.second.toString());
+								if (dns.store(peer.peerHash, ownLocation, peer.nextPutContentKey, input)) {
+									System.out.println("Put " + input + " at content key " + peer.nextPutContentKey.toString() + " for peer " + recipient);
+									peer.nextPutContentKey = Util.inc(peer.nextPutContentKey);
+									prefNextPutContentKeys.put(recipient, peer.nextPutContentKey.toString());
 								}
 							} catch (IOException e) {
 								e.printStackTrace();
@@ -357,26 +374,30 @@ public class ExampleSimple {
 
 			@Override
 			public void run() {
-				for (final Map.Entry<String, Pair<Number160, Pair<Number160, Number160>>> knownPeer : knownPeers
-						.entrySet()) {
-					String value = null;
-					Pair<Number160, Pair<Number160, Number160>> pair = knownPeer.getValue();
-					do {
-						value = null;
-						try {
-							System.out.println("Polling content key " + pair.second.first.toString() + " for peer " + knownPeer.getKey());
-							value = dns.get(ownLocation, pair.first,
-									pair.second.first);
-						} catch (ClassNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						if (value != null) {
-							System.out.println(value);
-							final String newLabelText = knownPeer.getKey() + ": " + value;
+				for (final Map.Entry<String, TSPeer> knownPeer : knownPeers.entrySet()) {
+					Map<Number160, Data> newData = null;
+					boolean firstTry = true;
+					TSPeer peer = knownPeer.getValue();
+					System.out.println("Polling for peer " + knownPeer.getKey());
+					newData = dns.getNewData(peer);
+					if (newData != null) {
+						System.out.println(newData.size() + " new entries found...");
+						for(Map.Entry<Number160, Data> entry : newData.entrySet())
+						{
+							String message = "";
+							try {
+								message = entry.getValue().getObject().toString();
+							} catch (ClassNotFoundException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							Date created = new Date(entry.getValue().getCreated());
+							DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
+							String createdString = formatter.format(created);
+							final String newLabelText = knownPeer.getKey() + " " + createdString + ": " + message;
 							
 							display.syncExec(new Runnable() {
 								
@@ -385,22 +406,20 @@ public class ExampleSimple {
 									Label label = new Label(scrollContainer, SWT.NONE);
 									label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
 									label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
-
+	
 									label.setText(newLabelText);
 									
 									label.pack();
-
+	
 									scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 									scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 									
 									scroll.setOrigin(0, scrollContainer.getSize().y);
 								}
 							});
-
-							pair.second.first = Util.inc(pair.second.first);
-							prefNextGetContentKeys.put(knownPeer.getKey(), pair.second.first.toString());
 						}
-					} while (value != null);
+						peer.receivedData.putAll(newData);
+					}
 				}
 			}
 		}, 0, 1000);
@@ -427,39 +446,56 @@ public class ExampleSimple {
 		System.exit(0);
 	}
 
-	private String get(Number160 location, Number160 domain,
+	private Data get(Number160 location, Number160 domain,
 			Number160 contentKey) throws ClassNotFoundException, IOException {
-		FutureDHT futureDHT = peer.get(location).setDomainKey(domain)
+		FutureDHT futureDHT = tomP2PPeer.get(location).setDomainKey(domain)
 				.setContentKey(contentKey).start();
 		futureDHT.awaitUninterruptibly();
 		if (futureDHT.isSuccess()) {
-			return futureDHT.getData().getObject().toString();
+			return futureDHT.getData();
 		}
 		return null;
 	}
 
 	private boolean store(Number160 location, Number160 domain,
 			Number160 contentKey, String value) throws IOException {
-		FutureDHT fut = peer.put(location).setData(contentKey, new Data(value))
+		FutureDHT fut = tomP2PPeer.put(location).setData(contentKey, new Data(value))
 				.setDomainKey(domain).start().awaitUninterruptibly();
 		return fut.isSuccess();
 	}
 
-	private Number160 getNextContentKey(Number160 location, Number160 domain) throws ClassNotFoundException, IOException {
-		FutureDHT futureDHT = peer.get(location).setDomainKey(domain).start();
+	private Map<Number160, Data> getNewData(TSPeer peer)
+	{
+		FutureDHT futureDHT = tomP2PPeer.get(ownLocation).setDomainKey(peer.peerHash).setAll(true).start();
+		futureDHT.awaitUninterruptibly();
+		Map<Number160, Data> newData = null;
+		if (futureDHT.isSuccess()) {
+			newData = futureDHT.getDataMap();
+			for(Number160 contentKey : peer.receivedData.keySet())
+			{
+				newData.remove(contentKey);
+			}
+		}
+		return newData;
+	}
+	
+	private Number160 getNextContentKey(Number160 location, Number160 domain) {
+		System.out.println("Looking for the highest contentKey in location " + location.toString() + " and domain " + domain.toString());
+		FutureDHT futureDHT = tomP2PPeer.get(location).setDomainKey(domain).setAll(true).start();
 		futureDHT.awaitUninterruptibly();
 		Number160 retVal = new Number160(0);
 		if (futureDHT.isSuccess()) {
 			Set<Number160> contentKeys = futureDHT.getDataMap().keySet();
 			for(Number160 contentKey : contentKeys)
 			{
+				System.out.println("Found contentKey " + contentKey.toString());
 				if(!Util.less(contentKey, retVal))
 				{
 					retVal = Util.inc(contentKey);
+					System.out.println("Setting the new next contentKey to " + retVal.toString());
 				}
 			}
 		}
 		return retVal;
 	}
-
 }
