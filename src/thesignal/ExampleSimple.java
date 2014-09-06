@@ -1,6 +1,7 @@
 package thesignal;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -120,6 +121,12 @@ public class ExampleSimple {
 					.setPeerAddress(fb.getBootstrapTo().iterator().next())
 					.start().awaitUninterruptibly();
 		}
+	
+	public static class TSMessage implements Serializable
+	{
+		private static final long serialVersionUID = -5115111712520066065L;
+		public long createdDateTime; // epoch milliseconds
+		public String message;
 	}
 	
 	private static class TSPeer
