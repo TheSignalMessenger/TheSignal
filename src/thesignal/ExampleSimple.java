@@ -131,7 +131,7 @@ public class ExampleSimple {
 		}
 	}
 	
-	public static void main(String[] args) throws NumberFormatException,
+	public static void main(final String[] args) throws NumberFormatException,
 			Exception {
 //		// Test code for Util.less...
 //		Random rand = new Random(System.currentTimeMillis());
@@ -287,12 +287,14 @@ public class ExampleSimple {
 						label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
 						label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
 
+						FutureDHT putDHT = null;
 						if(groupList.getSelection().length == 1)
 						{
 							recipient = groupList.getSelection()[0].getText();
 							TSPeer peer = knownPeers.get(recipient);
 							try {
-								if (dns.store(peer.peerHash, ownLocation, peer.nextPutContentKey, input)) {
+								putDHT = dns.store(peer.peerHash, ownLocation, peer.nextPutContentKey, input);
+								if(putDHT.isSuccess()) {
 									System.out.println("Put " + input + " at content key " + peer.nextPutContentKey.toString() + " for peer " + recipient);
 									peer.nextPutContentKey = Util.inc(peer.nextPutContentKey);
 									prefNextPutContentKeys.put(recipient, peer.nextPutContentKey.toString());
@@ -302,7 +304,11 @@ public class ExampleSimple {
 							}
 						}
 						
-						label.setText("To " + recipient + ": " + input);
+						if(putDHT == null) {
+							label.setText("Put of \"" + input + "\" to " + recipient + " was not successful");
+						} else {
+							label.setText(SimpleDateFormat.getDateTimeInstance().format(new Date()) + " - " + args[0] + ": " + input);
+						}
 
 						label.pack();
 					}
@@ -394,10 +400,7 @@ public class ExampleSimple {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							Date created = new Date(entry.getValue().getCreated());
-							DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
-							String createdString = formatter.format(created);
-							final String newLabelText = knownPeer.getKey() + " " + createdString + ": " + message;
+							final String newLabelText = Util.getLocaleFormattedCreationDateTimeString(entry.getValue()) + " - " + knownPeer.getKey() + ": " + message;
 							
 							display.syncExec(new Runnable() {
 								
@@ -457,11 +460,11 @@ public class ExampleSimple {
 		return null;
 	}
 
-	private boolean store(Number160 location, Number160 domain,
+	private FutureDHT store(Number160 location, Number160 domain,
 			Number160 contentKey, String value) throws IOException {
 		FutureDHT fut = tomP2PPeer.put(location).setData(contentKey, new Data(value))
 				.setDomainKey(domain).start().awaitUninterruptibly();
-		return fut.isSuccess();
+		return fut;
 	}
 
 	private Map<Number160, Data> getNewData(TSPeer peer)
