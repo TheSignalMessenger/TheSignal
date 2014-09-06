@@ -1,11 +1,13 @@
 package thesignal.utils;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
+import thesignal.ExampleSimple.TSMessage;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
@@ -91,7 +93,19 @@ public final class Util {
 	
 	public static String getLocaleFormattedCreationDateTimeString(Data data)
 	{
-		Date created = new Date(data.getCreated());
+		long createdMS = data.getCreated();
+		try {
+			TSMessage tsMessage = (TSMessage) data.getObject();
+			createdMS = tsMessage.createdDateTime;
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassCastException e) {
+		}
+		Date created = new Date(createdMS);
 		DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
 		return formatter.format(created);
 	}
