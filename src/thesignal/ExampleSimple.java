@@ -2,8 +2,8 @@ package thesignal;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +25,7 @@ import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -33,6 +34,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.TreeMultimap;
 
 import thesignal.utils.Util;
 import net.tomp2p.futures.FutureDHT;
@@ -121,13 +125,33 @@ public class ExampleSimple {
 	{
 		final String name;
 		final Number160 peerHash;
-		HashMap<Number160, Data> receivedData = new HashMap<Number160, Data>();
+		final private TreeMultimap<Long, Number160> dataDates = TreeMultimap.create();
+		final private HashMap<Number160, Data> receivedData = new HashMap<Number160, Data>();
 		Number160 nextPutContentKey = new Number160(0);
 		
 		TSPeer(String name)
 		{
 			this.name = name;
 			peerHash = Number160.createHash(name);
+		}
+		
+		void addNewData(Map<Number160, Data> newData)
+		{
+			for(Map.Entry<Number160, Data> entry : newData.entrySet())
+			{
+				dataDates.put(entry.getValue().getCreated(), entry.getKey());
+			}
+			receivedData.putAll(newData);
+		}
+		
+		Map<Number160, Data> getReceivedData()
+		{
+			return Collections.unmodifiableMap(receivedData); 
+		}
+		
+		ImmutableMultimap<Long, Number160> getDataDates()
+		{
+			return ImmutableMultimap.copyOf(dataDates);
 		}
 	}
 	
@@ -193,7 +217,8 @@ public class ExampleSimple {
 		final Composite scrollContainer = new Composite(scroll, SWT.NONE);
 		final Composite inputContainer = new Composite(shell, SWT.NONE);
 		final Table groupList = new Table(shell, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
-
+		int currentPeerSelection = 0;
+		
 		RowLayout scrollLayout = new RowLayout(SWT.VERTICAL);
 //		scrollLayout.justify = true;
 		
@@ -229,11 +254,15 @@ public class ExampleSimple {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				int nextPeerSelection = -1;
+				String peerName = null;
 				for(int i = 0 ; i < groupList.getItemCount(); ++i)
 				{
 					TableItem item = groupList.getItem(i);
 					if(item.equals(e.item))
 					{
+						nextPeerSelection = i;
+						peerName = item.getText();
 //		                item.setForeground(display.getSystemColor(SWT.COLOR_RED));
 		                item.setBackground(display.getSystemColor(SWT.COLOR_GRAY));
 					}
@@ -243,6 +272,30 @@ public class ExampleSimple {
 						item.setBackground(display.getSystemColor(SWT.TRANSPARENT));
 					}
 				}
+
+				for(Control control : scrollContainer.getChildren())
+				{
+					control.dispose();
+				}
+				
+				ImmutableMultimap<Long, Number160> dataDates = knownPeers.get(peerName).getDataDates();
+				Map<Number160, Data> receivedData = knownPeers.get(peerName).getReceivedData();
+				for(Map.Entry<Long, Number160> entry : dataDates.entries())
+				{
+					Label label = new Label(scrollContainer, SWT.NONE);
+					label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));;
+					label.setText(dns.generateReceivedMessageString(knownPeers.get(peerName), receivedData.get(entry.getValue())));
+
+					label.pack();
+				}
+				
+				scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+				scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+				scroll.setOrigin(0, scrollContainer.getSize().y);
+				
+				shell.layout();
 			}
 			
 			@Override
@@ -323,6 +376,7 @@ public class ExampleSimple {
 			}
 		});
 		
+		int currentPeerIndex = 0;
 		for(String peer : knownPeers.keySet())
 		{
 			if(!peer.equals(args[0]))
@@ -330,10 +384,15 @@ public class ExampleSimple {
 				TableItem tableItem = new TableItem(groupList, SWT.NONE);
 				tableItem.setText(peer);
 				tableItem.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+				if(args.length > 1 && peer.equals(args[1]))
+				{
+					currentPeerSelection = currentPeerIndex;
+				}	
+				currentPeerIndex++;
 			}
 		}
 		
-		groupList.select(0);
+		groupList.select(currentPeerSelection);
 		
 		Button button = new Button(inputContainer, SWT.PUSH);
 		button.setText("send");
@@ -382,7 +441,6 @@ public class ExampleSimple {
 			public void run() {
 				for (final Map.Entry<String, TSPeer> knownPeer : knownPeers.entrySet()) {
 					Map<Number160, Data> newData = null;
-					boolean firstTry = true;
 					TSPeer peer = knownPeer.getValue();
 					System.out.println("Polling for peer " + knownPeer.getKey());
 					newData = dns.getNewData(peer);
@@ -400,8 +458,8 @@ public class ExampleSimple {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							final String newLabelText = Util.getLocaleFormattedCreationDateTimeString(entry.getValue()) + " - " + knownPeer.getKey() + ": " + message;
-							
+							final String newLabelText = dns.generateReceivedMessageString(peer, entry.getValue());
+									
 							display.syncExec(new Runnable() {
 								
 								@Override
@@ -421,7 +479,7 @@ public class ExampleSimple {
 								}
 							});
 						}
-						peer.receivedData.putAll(newData);
+						peer.addNewData(newData);
 					}
 				}
 			}
@@ -500,5 +558,19 @@ public class ExampleSimple {
 			}
 		}
 		return retVal;
+	}
+	
+	public String generateReceivedMessageString(TSPeer peer, Data data)
+	{
+		try {
+			return Util.getLocaleFormattedCreationDateTimeString(data) + " - " + peer.name + ": " + data.getObject().toString();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "";
 	}
 }
