@@ -1,9 +1,13 @@
 package thesignal.utils;
 
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 import net.tomp2p.peers.Number160;
+import net.tomp2p.storage.Data;
 
 public final class Util {
     public static Number160 add(final Number160 left, final Number160 right)
@@ -83,5 +87,12 @@ public final class Util {
 
 	public static boolean greater(Number160 left, Number160 right) {
 		return less(right, left);
+	}
+	
+	public static String getLocaleFormattedCreationDateTimeString(Data data)
+	{
+		Date created = new Date(data.getCreated());
+		DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
+		return formatter.format(created);
 	}
 }
