@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
 import thesignal.utils.Pair;
@@ -76,6 +77,8 @@ public class ExampleSimple {
 	private Preferences prefNextPutContentKeys = prefs.node(prefKeyNextPutContentKeys);
 
 	private HashMap<String, TSPeer> knownPeers;
+	
+	private TreeMultimap<Long, Label> dateTimeLabels = TreeMultimap.create(Ordering.natural(), Ordering.arbitrary());
 
 	/**
 	 * Returns a pseudo-random number between 0 and Number160.MAX:VALUE,
@@ -216,20 +219,36 @@ public class ExampleSimple {
 		}
 	}
 
-	private void pushTextToStream(String text)
+	private void pushTextToStream(TSPeer peer, Data data)
 	{
-		Label label = new Label(scrollContainer, SWT.NONE);
-		label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-		label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
-	
-		label.setText(text);
+		if(peer.name.equals(currentPeer))
+		{
+			final String labelText = generateReceivedMessageString(peer, data);
+			Date messageDate = Util.getDate(data);
+			
+			Label label = new Label(scrollContainer, SWT.NONE);
+			label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+			label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+			Long sortAfterDate = dateTimeLabels.keySet().floor(messageDate.getTime());
+			if(sortAfterDate != null)
+			{
+				label.moveBelow(dateTimeLabels.get(sortAfterDate).first());
+			}
+			else if(scrollContainer.getChildren().length > 0)
+			{
+				label.moveAbove(scrollContainer.getChildren()[0]);
+			}
+			dateTimeLabels.put(messageDate.getTime(), label);
 		
-		label.pack();
-	
-		scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			label.setText(labelText);
+			
+			label.pack();
 		
-		scroll.setOrigin(0, scrollContainer.getSize().y);
+			scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			
+			scroll.setOrigin(0, scrollContainer.getSize().y);
+		}
 	}
 	
 	private void pushInput()
@@ -395,6 +414,7 @@ public class ExampleSimple {
 				{
 					control.dispose();
 				}
+				es.dateTimeLabels.clear();
 				
 				ImmutableMultimap<Long, Pair<Integer, Number160>> dataDates = es.knownPeers.get(es.currentPeer).getDataDates();
 				Map<Number160, Data> receivedData = es.knownPeers.get(es.currentPeer).getReceivedData();
@@ -507,7 +527,7 @@ public class ExampleSimple {
 			public void run() {
 				for (final Map.Entry<String, TSPeer> knownPeer : es.knownPeers.entrySet()) {
 					Map<Number160, Data> newData = null;
-					TSPeer peer = knownPeer.getValue();
+					final TSPeer peer = knownPeer.getValue();
 					if(peer.peerHash.equals(es.ownLocation))
 					{
 						continue;
@@ -518,15 +538,13 @@ public class ExampleSimple {
 						System.out.println(newData.size() + " new entries found...");
 						if(peer.name.equals(es.currentPeer))
 						{
-							for(Map.Entry<Number160, Data> entry : newData.entrySet())
+							for(final Map.Entry<Number160, Data> entry : newData.entrySet())
 							{
-								final String newLabelText = es.generateReceivedMessageString(peer, entry.getValue());
-										
 								es.display.syncExec(new Runnable() {
 									
 									@Override
 									public void run() {
-										es.pushTextToStream(newLabelText);
+										es.pushTextToStream(peer, entry.getValue());
 									}
 								});
 							}
