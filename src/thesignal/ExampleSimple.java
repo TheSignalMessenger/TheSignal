@@ -55,8 +55,27 @@ public class ExampleSimple {
 	public final static Preferences prefs = Preferences.userRoot().node(nodeName);
 	
 	final private Peer tomP2PPeer;
+	final private String ownName;
 	final private Number160 ownLocation;
 	private String currentPeer;
+
+	private Display display = new Display();
+	private Shell shell = new Shell(display);
+
+	private ScrolledComposite scroll = new ScrolledComposite(shell, SWT.V_SCROLL
+			| SWT.VERTICAL);
+	private Composite scrollContainer = new Composite(scroll, SWT.NONE);
+	private Composite inputContainer = new Composite(shell, SWT.NONE);
+	private Table groupList = new Table(shell, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
+	private Text inputTextField = new Text(inputContainer, SWT.MULTI | SWT.WRAP | SWT.BORDER);
+
+	private String prefKeyKnownPeers = "known_peers";
+	private Preferences prefKnownPeers = prefs.node(prefKeyKnownPeers);
+	
+	private String prefKeyNextPutContentKeys = "next_put_content_keys";
+	private Preferences prefNextPutContentKeys = prefs.node(prefKeyNextPutContentKeys);
+
+	private HashMap<String, TSPeer> knownPeers;
 
 	/**
 	 * Returns a pseudo-random number between 0 and Number160.MAX:VALUE,
@@ -104,7 +123,8 @@ public class ExampleSimple {
 		return randomNum;
 	}
 
-	public ExampleSimple(Number160 peerHash) throws Exception {
+	public ExampleSimple(String name, Number160 peerHash) throws Exception {
+		ownName = name;
 		ownLocation = peerHash;
 		// TODO: This was just a quick hack to be able to start the ExampleSimple multiple times on the same machine (apparently that can't be done with the same port)
 		tomP2PPeer = new PeerMaker(peerHash).setPorts(4000 + Math.round(new Random(System.currentTimeMillis()).nextFloat() * 200.f))
@@ -195,6 +215,82 @@ public class ExampleSimple {
 			return ImmutableMultimap.copyOf(dataDates);
 		}
 	}
+
+	private void pushTextToStream(String text)
+	{
+		Label label = new Label(scrollContainer, SWT.NONE);
+		label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+		label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+	
+		label.setText(text);
+		
+		label.pack();
+	
+		scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		scroll.setOrigin(0, scrollContainer.getSize().y);
+	}
+	
+	private void pushInput()
+	{
+		System.out.println("Enter catched");
+		
+		String input = this.inputTextField.getText();
+		// normalize line endings to \n, because \r is not recognized as "end of line"
+		input = input.replace ("/\\s*\\R/g", "\n");
+		// remove leading and trailing whitespace
+		input = input.replace ("/^\\s*|[\\t ]+$/gm", "");
+		
+		input = input.trim();
+		
+		if(!input.isEmpty())
+		{
+			String recipient = "no recipient";
+			
+			Label label = new Label(scrollContainer, SWT.NONE);
+			label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+			label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+
+			FutureDHT putDHT = null;
+			if(groupList.getSelection().length == 1)
+			{
+				recipient = groupList.getSelection()[0].getText();
+				TSPeer peer = knownPeers.get(recipient);
+				try {
+					putDHT = store(peer.peerHash, ownLocation, peer.nextPutContentKey, input);
+					if(putDHT.isSuccess()) {
+						System.out.println("Put " + input + " at content key " + peer.nextPutContentKey.toString() + " for peer " + recipient);
+						HashMap<Number160, Data> map = new HashMap<Number160, Data>();
+						TSMessage tsMessage = new TSMessage();
+						tsMessage.createdDateTime = new Date().getTime();
+						tsMessage.message = input;
+						map.put(peer.nextPutContentKey, new Data(tsMessage));
+						peer.addNewPutData(map);
+						peer.nextPutContentKey = Util.inc(peer.nextPutContentKey);
+						prefNextPutContentKeys.put(recipient, peer.nextPutContentKey.toString());
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			if(putDHT == null) {
+				label.setText("Put of \"" + input + "\" to " + recipient + " was not successful");
+			} else {
+				label.setText(SimpleDateFormat.getDateTimeInstance().format(new Date()) + " - " + ownName + ": " + input);
+			}
+
+			label.pack();
+		}
+
+		inputTextField.setText("");
+
+		scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		scroll.setOrigin(0, scrollContainer.getSize().y);
+	}
 	
 	public static void main(final String[] args) throws NumberFormatException,
 			Exception {
@@ -209,147 +305,131 @@ public class ExampleSimple {
 //			System.out.println(left + (test?"<":">"));
 //			System.out.println(right);
 //		}
-
-		final Number160 ownLocation = Number160.createHash(args[0]);
-		final ExampleSimple dns = new ExampleSimple(ownLocation);
-
-		final String prefKeyKnownPeers = "known_peers";
-		Preferences prefKnownPeers = prefs.node(prefKeyKnownPeers);
 		
-		final String prefKeyNextPutContentKeys = "next_put_content_keys";
-		final Preferences prefNextPutContentKeys = prefs.node(prefKeyNextPutContentKeys);
+		final ExampleSimple es = new ExampleSimple(args[0], Number160.createHash(args[0]));
 
 		for(int i = 1; i < args.length; ++i)
 		{
-			if(prefKnownPeers.get(args[i], "").isEmpty())
+			if(es.prefKnownPeers.get(args[i], "").isEmpty())
 			{
-				prefKnownPeers.put(args[i], Number160.createHash(args[i]).toString());
+				es.prefKnownPeers.put(args[i], Number160.createHash(args[i]).toString());
 			}
 		}
-		prefKnownPeers.flush();
+		es.prefKnownPeers.flush();
 		
-		final HashMap<String, TSPeer> knownPeers = new HashMap<String, TSPeer>(prefKnownPeers.keys().length);
-		for(String peerName : prefKnownPeers.keys())
+		es.knownPeers = new HashMap<String, TSPeer>(es.prefKnownPeers.keys().length);
+		for(String peerName : es.prefKnownPeers.keys())
 		{
 			TSPeer peer = new TSPeer(peerName);
 			
-			peer.nextPutContentKey = dns.getNextContentKey(peer.peerHash, ownLocation);
+			peer.nextPutContentKey = es.getNextContentKey(peer.peerHash, es.ownLocation);
 			
-			peer.nextPutContentKey = new Number160(prefNextPutContentKeys.get(peerName, peer.nextPutContentKey.toString()));
+			peer.nextPutContentKey = new Number160(es.prefNextPutContentKeys.get(peerName, peer.nextPutContentKey.toString()));
 			
 			System.out.println("Next put contentKey for peer " + peer + " is " + peer.nextPutContentKey.toString());
 			
-			peer.addNewPutData(dns.getPutData(peer));
+			peer.addNewPutData(es.getPutData(peer));
 			
-			knownPeers.put(peerName, peer);
+			es.knownPeers.put(peerName, peer);
 		}
 		
-		final Display display = new Display();
-		final Shell shell = new Shell(display);
-
 		// the layout manager handle the layout
 		// of the widgets in the container
 		FormLayout shellLayout = new FormLayout();
-		shell.setLayout(shellLayout);
+		es.shell.setLayout(shellLayout);
 
-		final ScrolledComposite scroll = new ScrolledComposite(shell, SWT.V_SCROLL
-				| SWT.VERTICAL);
-		final Composite scrollContainer = new Composite(scroll, SWT.NONE);
-		final Composite inputContainer = new Composite(shell, SWT.NONE);
-		final Table groupList = new Table(shell, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
-
-		dns.currentPeer = args[1];
+		es.currentPeer = args[1];
 
 		RowLayout scrollLayout = new RowLayout(SWT.VERTICAL);
 //		scrollLayout.justify = true;
 		
-		scrollContainer.setLayout(scrollLayout);
-		scrollContainer.setLayoutData(new RowData(SWT.MAX, SWT.FILL));
+		es.scrollContainer.setLayout(scrollLayout);
+		es.scrollContainer.setLayoutData(new RowData(SWT.MAX, SWT.FILL));
 		
-		scroll.setContent(scrollContainer);
+		es.scroll.setContent(es.scrollContainer);
 		FormData scrollLayoutData = new FormData();
 		scrollLayoutData.top = new FormAttachment(0,0);
 		scrollLayoutData.left = new FormAttachment(0,0);
 		scrollLayoutData.right = new FormAttachment(100, -180);
-		scrollLayoutData.bottom = new FormAttachment(inputContainer, 0);
-		scroll.setLayoutData(scrollLayoutData);
+		scrollLayoutData.bottom = new FormAttachment(es.inputContainer, 0);
+		es.scroll.setLayoutData(scrollLayoutData);
 		
-		scrollContainer.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+		es.scrollContainer.setBackground(es.display.getSystemColor(SWT.COLOR_BLACK));
 
-		scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		es.scrollContainer.setSize(es.scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
-		scroll.setExpandHorizontal(true);
-		scroll.setExpandVertical(true);
-		scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		es.scroll.setExpandHorizontal(true);
+		es.scroll.setExpandVertical(true);
+		es.scroll.setMinSize(es.scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
-		inputContainer.setLayout(new FormLayout());
+		es.inputContainer.setLayout(new FormLayout());
 		
 		FormData groupListLayoutData = new FormData();
 		groupListLayoutData.top = new FormAttachment(0,0);
-		groupListLayoutData.left = new FormAttachment(scroll,0);
+		groupListLayoutData.left = new FormAttachment(es.scroll,0);
 		groupListLayoutData.right = new FormAttachment(100, 0);
-		groupListLayoutData.bottom = new FormAttachment(inputContainer, 0);
-		groupList.setLayoutData(groupListLayoutData);
-		groupList.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-		groupList.addSelectionListener(new SelectionListener() {
+		groupListLayoutData.bottom = new FormAttachment(es.inputContainer, 0);
+		es.groupList.setLayoutData(groupListLayoutData);
+		es.groupList.setBackground(es.display.getSystemColor(SWT.TRANSPARENT));
+		es.groupList.addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for(int i = 0 ; i < groupList.getItemCount(); ++i)
+				for(int i = 0 ; i < es.groupList.getItemCount(); ++i)
 				{
-					TableItem item = groupList.getItem(i);
+					TableItem item = es.groupList.getItem(i);
 					if(item.equals(e.item))
 					{
-						dns.currentPeer = item.getText();
+						es.currentPeer = item.getText();
 //		                item.setForeground(display.getSystemColor(SWT.COLOR_RED));
-		                item.setBackground(display.getSystemColor(SWT.COLOR_GRAY));
+		                item.setBackground(es.display.getSystemColor(SWT.COLOR_GRAY));
 					}
 					else
 					{
-						item.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
-						item.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+						item.setForeground(es.display.getSystemColor(SWT.COLOR_DARK_GREEN));
+						item.setBackground(es.display.getSystemColor(SWT.TRANSPARENT));
 					}
 				}
 
-				for(Control control : scrollContainer.getChildren())
+				for(Control control : es.scrollContainer.getChildren())
 				{
 					control.dispose();
 				}
 				
-				ImmutableMultimap<Long, Pair<Integer, Number160>> dataDates = knownPeers.get(dns.currentPeer).getDataDates();
-				Map<Number160, Data> receivedData = knownPeers.get(dns.currentPeer).getReceivedData();
-				Map<Number160, Data> putData = knownPeers.get(dns.currentPeer).getPutData();
+				ImmutableMultimap<Long, Pair<Integer, Number160>> dataDates = es.knownPeers.get(es.currentPeer).getDataDates();
+				Map<Number160, Data> receivedData = es.knownPeers.get(es.currentPeer).getReceivedData();
+				Map<Number160, Data> putData = es.knownPeers.get(es.currentPeer).getPutData();
 				for(Map.Entry<Long, Pair<Integer, Number160>> entry : dataDates.entries())
 				{
 					int dataCode = entry.getValue().first;
 					Number160 contentKey = entry.getValue().second;
-					Label label = new Label(scrollContainer, SWT.NONE);
-					label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-					label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+					Label label = new Label(es.scrollContainer, SWT.NONE);
+					label.setBackground(es.display.getSystemColor(SWT.TRANSPARENT));
+					label.setForeground(es.display.getSystemColor(SWT.COLOR_DARK_GREEN));
 					Data data = null;
 					String labelText = "";
 					if(dataCode == TSPeer.getCode) {
 						data = receivedData.get(contentKey);
-						labelText = dns.generateReceivedMessageString(knownPeers.get(dns.currentPeer), data);
+						labelText = es.generateReceivedMessageString(es.knownPeers.get(es.currentPeer), data);
 					} else if(dataCode == TSPeer.putCode) {
 						data = putData.get(contentKey);
-						labelText = dns.generatePutMessageString(args[0], data);
+						labelText = es.generatePutMessageString(args[0], data);
 					}
 					label.setText(labelText);
 					label.pack();
 				}
 				
-				scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-				scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+				es.scrollContainer.setSize(es.scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+				es.scroll.setMinSize(es.scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
-				scroll.setOrigin(0, scrollContainer.getSize().y);
+				es.scroll.setOrigin(0, es.scrollContainer.getSize().y);
 				
-				shell.layout();
+				es.shell.layout();
 			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-	            TableItem[] selItems = groupList.getSelection();
+	            TableItem[] selItems = es.groupList.getSelection();
 	            
 				System.out.println(selItems.toString() + " selected");
 			}
@@ -359,87 +439,31 @@ public class ExampleSimple {
 		inputLayoutData.left = new FormAttachment(0,0);
 		inputLayoutData.right = new FormAttachment(100, 0);
 		inputLayoutData.bottom = new FormAttachment(100, 0);
-		inputContainer.setLayoutData(inputLayoutData);
+		es.inputContainer.setLayoutData(inputLayoutData);
 
-		final Text inputTextField = new Text(inputContainer, SWT.MULTI | SWT.WRAP | SWT.BORDER);
-		inputTextField.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-		inputTextField.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+		es.inputTextField.setBackground(es.display.getSystemColor(SWT.TRANSPARENT));
+		es.inputTextField.setForeground(es.display.getSystemColor(SWT.COLOR_DARK_GREEN));
 		
-		inputTextField.addListener(SWT.KeyDown, new Listener() {
+		es.inputTextField.addListener(SWT.KeyDown, new Listener() {
 			
 			@Override
 			public void handleEvent(Event event) {
 				if(event.keyCode == SWT.CR || event.keyCode == SWT.KEYPAD_CR)
 				{
-					System.out.println("Enter catched");
-					
-					String input = inputTextField.getText();
-					// normalize line endings to \n, because \r is not recognized as "end of line"
-					input = input.replace ("/\\s*\\R/g", "\n");
-					// remove leading and trailing whitespace
-					input = input.replace ("/^\\s*|[\\t ]+$/gm", "");
-					
-					input = input.trim();
-					
-					if(!input.isEmpty())
-					{
-						String recipient = "no recipient";
-						
-						Label label = new Label(scrollContainer, SWT.NONE);
-						label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-						label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
-
-						FutureDHT putDHT = null;
-						if(groupList.getSelection().length == 1)
-						{
-							recipient = groupList.getSelection()[0].getText();
-							TSPeer peer = knownPeers.get(recipient);
-							try {
-								putDHT = dns.store(peer.peerHash, ownLocation, peer.nextPutContentKey, input);
-								if(putDHT.isSuccess()) {
-									System.out.println("Put " + input + " at content key " + peer.nextPutContentKey.toString() + " for peer " + recipient);
-									HashMap<Number160, Data> map = new HashMap<Number160, Data>();
-									TSMessage tsMessage = new TSMessage();
-									tsMessage.createdDateTime = new Date().getTime();
-									tsMessage.message = input;
-									map.put(peer.nextPutContentKey, new Data(tsMessage));
-									peer.addNewPutData(map);
-									peer.nextPutContentKey = Util.inc(peer.nextPutContentKey);
-									prefNextPutContentKeys.put(recipient, peer.nextPutContentKey.toString());
-								}
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-						
-						if(putDHT == null) {
-							label.setText("Put of \"" + input + "\" to " + recipient + " was not successful");
-						} else {
-							label.setText(SimpleDateFormat.getDateTimeInstance().format(new Date()) + " - " + args[0] + ": " + input);
-						}
-
-						label.pack();
-					}
-
-					inputTextField.setText("");
-
-					scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-					scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-					
-					scroll.setOrigin(0, scrollContainer.getSize().y);
+					es.pushInput();
 				}
 			}
 		});
 
 		int peerIndex = 0;
 		int startPeerIndex = 0;
-		for(String peer : knownPeers.keySet())
+		for(String peer : es.knownPeers.keySet())
 		{
 			if(!peer.equals(args[0]))
 			{
-				TableItem tableItem = new TableItem(groupList, SWT.NONE);
+				TableItem tableItem = new TableItem(es.groupList, SWT.NONE);
 				tableItem.setText(peer);
-				tableItem.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+				tableItem.setForeground(es.display.getSystemColor(SWT.COLOR_DARK_GREEN));
 				if(args.length > 1 && peer.equals(args[1]))
 				{
 					startPeerIndex = peerIndex;
@@ -448,9 +472,9 @@ public class ExampleSimple {
 			}
 		}
 		
-		groupList.select(startPeerIndex);
+		es.groupList.select(startPeerIndex);
 		
-		Button button = new Button(inputContainer, SWT.PUSH);
+		Button button = new Button(es.inputContainer, SWT.PUSH);
 		button.setText("send");
 
 		FormData inputTextFieldLayoutData = new FormData();
@@ -458,7 +482,7 @@ public class ExampleSimple {
 		inputTextFieldLayoutData.right = new FormAttachment(button, 0);
 		inputTextFieldLayoutData.top = new FormAttachment(0, 0);
 		inputTextFieldLayoutData.bottom = new FormAttachment(100, 0);
-		inputTextField.setLayoutData(inputTextFieldLayoutData);
+		es.inputTextField.setLayoutData(inputTextFieldLayoutData);
 
 		FormData buttonLayoutData = new FormData();
 		buttonLayoutData.right = new FormAttachment(100, 0);
@@ -470,64 +494,39 @@ public class ExampleSimple {
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				System.out.println("Called!");
-				
-				Label label = new Label(scrollContainer, SWT.NONE);
-				label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-				label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));;
-				label.setText("Called");
-
-				label.pack();
-				
-				scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-				scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-				
-				scroll.setOrigin(0, scrollContainer.getSize().y);
-				
-				shell.layout();
+				es.pushInput();
 			}
 		});
 
-		shell.open();
+		es.shell.open();
 //
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 
 			@Override
 			public void run() {
-				for (final Map.Entry<String, TSPeer> knownPeer : knownPeers.entrySet()) {
+				for (final Map.Entry<String, TSPeer> knownPeer : es.knownPeers.entrySet()) {
 					Map<Number160, Data> newData = null;
 					TSPeer peer = knownPeer.getValue();
-					if(peer.peerHash.equals(ownLocation))
+					if(peer.peerHash.equals(es.ownLocation))
 					{
 						continue;
 					}
 					System.out.println("Polling for peer " + knownPeer.getKey());
-					newData = dns.getNewData(peer);
+					newData = es.getNewData(peer);
 					if (newData != null) {
 						System.out.println(newData.size() + " new entries found...");
-						if(peer.name.equals(dns.currentPeer))
+						if(peer.name.equals(es.currentPeer))
 						{
 							for(Map.Entry<Number160, Data> entry : newData.entrySet())
 							{
-								final String newLabelText = dns.generateReceivedMessageString(peer, entry.getValue());
+								final String newLabelText = es.generateReceivedMessageString(peer, entry.getValue());
 										
-								display.syncExec(new Runnable() {
+								es.display.syncExec(new Runnable() {
 									
 									@Override
 									public void run() {
-										Label label = new Label(scrollContainer, SWT.NONE);
-										label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-										label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
-		
-										label.setText(newLabelText);
-										
-										label.pack();
-		
-										scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-										scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-										
-										scroll.setOrigin(0, scrollContainer.getSize().y);
+										es.pushTextToStream(newLabelText);
 									}
 								});
 							}
@@ -539,20 +538,20 @@ public class ExampleSimple {
 		}, 0, 1000);
 
 		// run the event loop as long as the window is open
-		while (!shell.isDisposed()) {
+		while (!es.shell.isDisposed()) {
 			// read the next OS event queue and transfer it to a SWT event
-			if (!display.readAndDispatch()) {
+			if (!es.display.readAndDispatch()) {
 				// if there are currently no other OS event to process
 				// sleep until the next OS event is available
-				display.sleep();
+				es.display.sleep();
 			}
 		}
 
 		timer.cancel();
 		// disposes all associated windows and their components
-		display.dispose();
+		es.display.dispose();
 		
-		prefNextPutContentKeys.flush();
+		es.prefNextPutContentKeys.flush();
 		
 		System.out.println("Finished everything and flushed the preferences!");
 		
