@@ -226,17 +226,30 @@ public class ExampleSimple {
 			final String labelText = generateReceivedMessageString(peer, data);
 			Date messageDate = Util.getDate(data);
 			
+			List<Control> scrollChildren = Arrays.asList(scrollContainer.getChildren());
 			Label label = new Label(scrollContainer, SWT.NONE);
 			label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
 			label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
 			Long sortAfterDate = dateTimeLabels.keySet().floor(messageDate.getTime());
 			if(sortAfterDate != null)
 			{
-				label.moveBelow(dateTimeLabels.get(sortAfterDate).first());
+				NavigableSet<Label> labels = dateTimeLabels.get(sortAfterDate);
+				int lastLabelIndex = -1;
+				Label lastLabel = null;
+				for(Label l : labels)
+				{
+					int labelIndex = scrollChildren.indexOf(l);
+					if(labelIndex > lastLabelIndex)
+					{
+						lastLabelIndex = labelIndex;
+						lastLabel = l;
+					}
+				}
+				label.moveBelow(lastLabel);
 			}
-			else if(scrollContainer.getChildren().length > 0)
+			else if(scrollChildren.size() > 0)
 			{
-				label.moveAbove(scrollContainer.getChildren()[0]);
+				label.moveAbove(scrollChildren.get(0));
 			}
 			dateTimeLabels.put(messageDate.getTime(), label);
 		
