@@ -2,12 +2,16 @@ package thesignal;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
@@ -219,11 +223,16 @@ public class ExampleSimple {
 		}
 	}
 
-	private void pushTextToStream(TSPeer peer, Data data)
+	private void pushTextToStream(TSPeer peer, Data data, int typeCode)
 	{
 		if(peer.name.equals(currentPeer))
 		{
-			final String labelText = generateReceivedMessageString(peer, data);
+			final String labelText;
+			if(typeCode == TSPeer.getCode) {
+				labelText = generateReceivedMessageString(peer, data);
+			} else {
+				labelText = generatePutMessageString(ownName, data);
+			}
 			Date messageDate = Util.getDate(data);
 			
 			List<Control> scrollChildren = Arrays.asList(scrollContainer.getChildren());
@@ -360,7 +369,15 @@ public class ExampleSimple {
 			
 			System.out.println("Next put contentKey for peer " + peer + " is " + peer.nextPutContentKey.toString());
 			
-			peer.addNewPutData(es.getPutData(peer));
+			Map<Number160, Data> putData = es.getPutData(peer);
+			if(putData != null)
+			{
+				for(Map.Entry<Number160, Data> entry: putData.entrySet())
+				{
+					es.pushTextToStream(peer, entry.getValue(), TSPeer.putCode);
+					peer.addNewPutData(putData);
+				}
+			}
 			
 			es.knownPeers.put(peerName, peer);
 		}
@@ -547,8 +564,8 @@ public class ExampleSimple {
 					}
 					System.out.println("Polling for peer " + knownPeer.getKey());
 					newData = es.getNewData(peer);
-					if (newData != null) {
-						System.out.println(newData.size() + " new entries found...");
+					if (newData != null && newData.size() > 0) {
+						System.out.println(newData.size() + " new received entries found...");
 						if(peer.name.equals(es.currentPeer))
 						{
 							for(final Map.Entry<Number160, Data> entry : newData.entrySet())
@@ -557,7 +574,25 @@ public class ExampleSimple {
 									
 									@Override
 									public void run() {
-										es.pushTextToStream(peer, entry.getValue());
+										es.pushTextToStream(peer, entry.getValue(), TSPeer.getCode);
+									}
+								});
+							}
+						}
+						peer.addNewReceivedData(newData);
+					}
+					Map<Number160, Data> newPutData = es.getPutData(peer);
+					if (newPutData != null && newPutData.size() > 0) {
+						System.out.println(newPutData.size() + " new put entries found...");
+						if(peer.name.equals(es.currentPeer))
+						{
+							for(final Map.Entry<Number160, Data> entry : newPutData.entrySet())
+							{
+								es.display.syncExec(new Runnable() {
+									
+									@Override
+									public void run() {
+										es.pushTextToStream(peer, entry.getValue(), TSPeer.putCode);
 									}
 								});
 							}
