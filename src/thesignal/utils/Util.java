@@ -91,7 +91,7 @@ public final class Util {
 		return less(right, left);
 	}
 	
-	public static String getLocaleFormattedCreationDateTimeString(Data data)
+	public static Date getDate(Data data)
 	{
 		long createdMS = data.getCreated();
 		try {
@@ -105,7 +105,12 @@ public final class Util {
 			e.printStackTrace();
 		} catch (ClassCastException e) {
 		}
-		Date created = new Date(createdMS);
+		return new Date(createdMS);
+	}
+	
+	public static String getLocaleFormattedCreationDateTimeString(Data data)
+	{
+		Date created = getDate(data);
 		DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
 		return formatter.format(created);
 	}
