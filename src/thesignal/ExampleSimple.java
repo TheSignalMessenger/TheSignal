@@ -399,7 +399,10 @@ public class ExampleSimple {
 								if(putDHT.isSuccess()) {
 									System.out.println("Put " + input + " at content key " + peer.nextPutContentKey.toString() + " for peer " + recipient);
 									HashMap<Number160, Data> map = new HashMap<Number160, Data>();
-									map.put(peer.nextPutContentKey, new Data(input));
+									TSMessage tsMessage = new TSMessage();
+									tsMessage.createdDateTime = new Date().getTime();
+									tsMessage.message = input;
+									map.put(peer.nextPutContentKey, new Data(tsMessage));
 									peer.addNewPutData(map);
 									peer.nextPutContentKey = Util.inc(peer.nextPutContentKey);
 									prefNextPutContentKeys.put(recipient, peer.nextPutContentKey.toString());
@@ -569,7 +572,10 @@ public class ExampleSimple {
 
 	private FutureDHT store(Number160 location, Number160 domain,
 			Number160 contentKey, String value) throws IOException {
-		FutureDHT fut = tomP2PPeer.put(location).setData(contentKey, new Data(value))
+		TSMessage message = new TSMessage();
+		message.createdDateTime = new Date().getTime();
+		message.message = value;
+		FutureDHT fut = tomP2PPeer.put(location).setData(contentKey, new Data(message))
 				.setDomainKey(domain).start().awaitUninterruptibly();
 		return fut;
 	}
@@ -624,31 +630,33 @@ public class ExampleSimple {
 		return retVal;
 	}
 	
+	public String getMessageFromData(Data data)
+	{
+		String message = "";
+		Object dataObject = null;
+		try {
+			TSMessage tsMessage;
+			dataObject = data.getObject();
+			tsMessage = (TSMessage) dataObject;
+			message = tsMessage.message;
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ClassCastException e) {
+			message = dataObject.toString();
+		}
+		return message;
+	}
+	
 	public String generateReceivedMessageString(TSPeer peer, Data data)
 	{
-		try {
-			return Util.getLocaleFormattedCreationDateTimeString(data) + " - " + peer.name + ": " + data.getObject().toString();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return "";
+		return Util.getLocaleFormattedCreationDateTimeString(data) + " - " + peer.name + ": " + getMessageFromData(data);
 	}
 
 	public String generatePutMessageString(String ownName, Data data)
 	{
-		try {
-			return Util.getLocaleFormattedCreationDateTimeString(data) + " - " + ownName + ": " + data.getObject().toString();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return "";
+		return Util.getLocaleFormattedCreationDateTimeString(data) + " - " + ownName + ": " + getMessageFromData(data);
 	}
 }
