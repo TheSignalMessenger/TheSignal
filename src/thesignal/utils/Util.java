@@ -91,6 +91,26 @@ public final class Util {
 		return less(right, left);
 	}
 	
+	public static String getMessageFromData(Data data)
+	{
+		String message = "";
+		Object dataObject = null;
+		try {
+			TSMessage tsMessage;
+			dataObject = data.getObject();
+			tsMessage = (TSMessage) dataObject;
+			message = tsMessage.message;
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ClassCastException e) {
+			message = dataObject.toString();
+		}
+		return message;
+	}
+	
 	public static Date getDate(Data data)
 	{
 		long createdMS = data.getCreated();
