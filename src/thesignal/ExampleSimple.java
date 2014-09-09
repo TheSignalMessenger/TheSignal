@@ -56,6 +56,7 @@ public class ExampleSimple {
 	
 	final private Peer tomP2PPeer;
 	final private Number160 ownLocation;
+	private String currentPeer;
 
 	/**
 	 * Returns a pseudo-random number between 0 and Number160.MAX:VALUE,
@@ -256,8 +257,9 @@ public class ExampleSimple {
 		final Composite scrollContainer = new Composite(scroll, SWT.NONE);
 		final Composite inputContainer = new Composite(shell, SWT.NONE);
 		final Table groupList = new Table(shell, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
-		int currentPeerSelection = 0;
-		
+
+		dns.currentPeer = args[1];
+
 		RowLayout scrollLayout = new RowLayout(SWT.VERTICAL);
 //		scrollLayout.justify = true;
 		
@@ -293,15 +295,12 @@ public class ExampleSimple {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				int nextPeerSelection = -1;
-				String peerName = null;
 				for(int i = 0 ; i < groupList.getItemCount(); ++i)
 				{
 					TableItem item = groupList.getItem(i);
 					if(item.equals(e.item))
 					{
-						nextPeerSelection = i;
-						peerName = item.getText();
+						dns.currentPeer = item.getText();
 //		                item.setForeground(display.getSystemColor(SWT.COLOR_RED));
 		                item.setBackground(display.getSystemColor(SWT.COLOR_GRAY));
 					}
@@ -317,9 +316,9 @@ public class ExampleSimple {
 					control.dispose();
 				}
 				
-				ImmutableMultimap<Long, Pair<Integer, Number160>> dataDates = knownPeers.get(peerName).getDataDates();
-				Map<Number160, Data> receivedData = knownPeers.get(peerName).getReceivedData();
-				Map<Number160, Data> putData = knownPeers.get(peerName).getPutData();
+				ImmutableMultimap<Long, Pair<Integer, Number160>> dataDates = knownPeers.get(dns.currentPeer).getDataDates();
+				Map<Number160, Data> receivedData = knownPeers.get(dns.currentPeer).getReceivedData();
+				Map<Number160, Data> putData = knownPeers.get(dns.currentPeer).getPutData();
 				for(Map.Entry<Long, Pair<Integer, Number160>> entry : dataDates.entries())
 				{
 					int dataCode = entry.getValue().first;
@@ -331,7 +330,7 @@ public class ExampleSimple {
 					String labelText = "";
 					if(dataCode == TSPeer.getCode) {
 						data = receivedData.get(contentKey);
-						labelText = dns.generateReceivedMessageString(knownPeers.get(peerName), data);
+						labelText = dns.generateReceivedMessageString(knownPeers.get(dns.currentPeer), data);
 					} else if(dataCode == TSPeer.putCode) {
 						data = putData.get(contentKey);
 						labelText = dns.generatePutMessageString(args[0], data);
@@ -428,8 +427,9 @@ public class ExampleSimple {
 				}
 			}
 		});
-		
-		int currentPeerIndex = 0;
+
+		int peerIndex = 0;
+		int startPeerIndex = 0;
 		for(String peer : knownPeers.keySet())
 		{
 			if(!peer.equals(args[0]))
@@ -439,13 +439,13 @@ public class ExampleSimple {
 				tableItem.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
 				if(args.length > 1 && peer.equals(args[1]))
 				{
-					currentPeerSelection = currentPeerIndex;
-				}	
-				currentPeerIndex++;
+					startPeerIndex = peerIndex;
+				}
+				peerIndex++;
 			}
 		}
 		
-		groupList.select(currentPeerSelection);
+		groupList.select(startPeerIndex);
 		
 		Button button = new Button(inputContainer, SWT.PUSH);
 		button.setText("send");
@@ -503,38 +503,31 @@ public class ExampleSimple {
 					newData = dns.getNewData(peer);
 					if (newData != null) {
 						System.out.println(newData.size() + " new entries found...");
-						for(Map.Entry<Number160, Data> entry : newData.entrySet())
+						if(peer.name.equals(dns.currentPeer))
 						{
-							String message = "";
-							try {
-								message = entry.getValue().getObject().toString();
-							} catch (ClassNotFoundException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+							for(Map.Entry<Number160, Data> entry : newData.entrySet())
+							{
+								final String newLabelText = dns.generateReceivedMessageString(peer, entry.getValue());
+										
+								display.syncExec(new Runnable() {
+									
+									@Override
+									public void run() {
+										Label label = new Label(scrollContainer, SWT.NONE);
+										label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
+										label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
+		
+										label.setText(newLabelText);
+										
+										label.pack();
+		
+										scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+										scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+										
+										scroll.setOrigin(0, scrollContainer.getSize().y);
+									}
+								});
 							}
-							final String newLabelText = dns.generateReceivedMessageString(peer, entry.getValue());
-									
-							display.syncExec(new Runnable() {
-								
-								@Override
-								public void run() {
-									Label label = new Label(scrollContainer, SWT.NONE);
-									label.setBackground(display.getSystemColor(SWT.TRANSPARENT));
-									label.setForeground(display.getSystemColor(SWT.COLOR_DARK_GREEN));
-	
-									label.setText(newLabelText);
-									
-									label.pack();
-	
-									scrollContainer.setSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-									scroll.setMinSize(scrollContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-									
-									scroll.setOrigin(0, scrollContainer.getSize().y);
-								}
-							});
 						}
 						peer.addNewReceivedData(newData);
 					}
