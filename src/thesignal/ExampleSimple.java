@@ -43,6 +43,7 @@ import thesignal.utils.Pair;
 import thesignal.utils.Util;
 import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.futures.FutureBootstrap;
+import net.tomp2p.futures.FutureDiscover;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerMaker;
 import net.tomp2p.peers.Number160;
@@ -107,20 +108,27 @@ public class ExampleSimple {
 		// TODO: This was just a quick hack to be able to start the ExampleSimple multiple times on the same machine (apparently that can't be done with the same port)
 		tomP2PPeer = new PeerMaker(peerHash).setPorts(4000 + Math.round(new Random(System.currentTimeMillis()).nextFloat() * 200.f))
 				.makeAndListen();
-		FutureBootstrap fb = tomP2PPeer
-				.bootstrap()
-				.setInetAddress(InetAddress.getByName("user.nullteilerfrei.de"))
-				.setPorts(4001).start();
-//		FutureBootstrap fb = tomP2P
-//				.bootstrap()
-//				.setInetAddress(InetAddress.getByName("tsp.no-ip.org"))
-//				.setPorts(4242).start();
-		fb.awaitUninterruptibly();
-		if (fb.getBootstrapTo() != null) {
-			tomP2PPeer.discover()
-					.setPeerAddress(fb.getBootstrapTo().iterator().next())
-					.start().awaitUninterruptibly();
-		}
+		boolean success = false;
+		do {
+			FutureBootstrap fb = tomP2PPeer
+					.bootstrap()
+					.setInetAddress(InetAddress.getByName("user.nullteilerfrei.de"))
+					.setPorts(4001).start();
+//			FutureBootstrap fb = tomP2P
+//			.bootstrap()
+//			.setInetAddress(InetAddress.getByName("tsp.no-ip.org"))
+//			.setPorts(4242).start();
+			fb.awaitUninterruptibly();
+			success = fb.isSuccess();
+			if(fb.getBootstrapTo() != null)
+			{
+				FutureDiscover fc = tomP2PPeer.discover()
+				.setPeerAddress(fb.getBootstrapTo().iterator().next())
+				.start();
+				fc.awaitUninterruptibly();
+			}
+		} while (!success);
+	}
 	
 	public static class TSMessage implements Serializable
 	{
