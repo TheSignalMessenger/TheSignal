@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
-import thesignal.ExampleSimple.TSMessage;
+import thesignal.entity.Message;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
@@ -96,12 +96,12 @@ public final class Util {
 		String message = "";
 		Object dataObject = null;
 		try {
-			TSMessage tsMessage;
+			Message msg;
 			dataObject = data.getObject();
-			tsMessage = (TSMessage) dataObject;
-			message = tsMessage.message;
+			msg = (Message) dataObject;
+			message = msg.message;
 		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
+			// e1.printStackTrace();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -115,11 +115,10 @@ public final class Util {
 	{
 		long createdMS = data.getCreated();
 		try {
-			TSMessage tsMessage = (TSMessage) data.getObject();
-			createdMS = tsMessage.createdDateTime;
+			Message msg = (Message) data.getObject();
+			createdMS = msg.createdDateTime;
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
