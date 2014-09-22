@@ -597,7 +597,7 @@ public class ExampleSimple {
 								});
 							}
 						}
-						peer.addNewReceivedData(newData);
+						peer.addNewPutData(newPutData);
 					}
 				}
 			}
