@@ -250,6 +250,8 @@ public class ExampleSimple {
 		final ExampleSimple es = new ExampleSimple(args[0],
 				Number160.createHash(args[0]));
 
+		es.prefKnownPeers.clear();
+		
 		for (int i = 1; i < args.length; ++i) {
 			if (es.prefKnownPeers.get(args[i], "").isEmpty()) {
 				es.prefKnownPeers.put(args[i], Number160.createHash(args[i])
