@@ -15,8 +15,7 @@ public class QuickStartPutter {
 	public QuickStartPutter(int peerId) throws Exception {
 		peer = new PeerMaker(Number160.createHash(peerId)).setPorts(
 				4000 + peerId).makeAndListen();
-		FutureBootstrap fb = peer
-				.bootstrap()
+		FutureBootstrap fb = peer.bootstrap()
 				.setInetAddress(InetAddress.getByName("scavenger"))
 				.setPorts(4001).start();
 		fb.awaitUninterruptibly();
@@ -29,6 +28,16 @@ public class QuickStartPutter {
 		dns.store("nachricht2", "daten2");
 		dns.store("nachricht3", "daten3");
 		dns.store("nachricht1", "daten4");
+		dns.multistore("multiricht", "datakey1", "multdata1");
+		dns.multistore("multiricht", "datakey2", "multdata2");
+		dns.multistore("multiricht", "datakey3", "multdata3");
+	}
+
+	private void multistore(String name, String datakey, String data)
+			throws IOException {
+		peer.put(Number160.createHash(name))
+				.setData(Number160.createHash(datakey), new Data(data)).start()
+				.awaitUninterruptibly();
 	}
 
 	private void store(String name, String data) throws IOException {
