@@ -142,7 +142,7 @@ public class ExampleSimple {
 					.bootstrap()
 					.setInetAddress(InetAddress.getByName("user.nullteilerfrei.de"))
 					.setPorts(4001).start();
-//			FutureBootstrap fb = tomP2P
+//			FutureBootstrap fb = tomP2PPeer
 //			.bootstrap()
 //			.setInetAddress(InetAddress.getByName("tsp.no-ip.org"))
 //			.setPorts(4242).start();
