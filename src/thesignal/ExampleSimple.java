@@ -104,10 +104,10 @@ public class ExampleSimple {
 					.setInetAddress(
 							InetAddress.getByName("user.nullteilerfrei.de"))
 					.setPorts(4001).start();
-			// FutureBootstrap fb = tomP2P
-			// .bootstrap()
-			// .setInetAddress(InetAddress.getByName("tsp.no-ip.org"))
-			// .setPorts(4242).start();
+//			FutureBootstrap fb = tomP2PPeer
+//			.bootstrap()
+//			.setInetAddress(InetAddress.getByName("tsp.no-ip.org"))
+//			.setPorts(4242).start();
 			fb.awaitUninterruptibly();
 			success = fb.isSuccess();
 			if (fb.getBootstrapTo() != null) {
@@ -250,6 +250,8 @@ public class ExampleSimple {
 		final ExampleSimple es = new ExampleSimple(args[0],
 				Number160.createHash(args[0]));
 
+		es.prefKnownPeers.clear();
+		
 		for (int i = 1; i < args.length; ++i) {
 			if (es.prefKnownPeers.get(args[i], "").isEmpty()) {
 				es.prefKnownPeers.put(args[i], Number160.createHash(args[i])
@@ -508,7 +510,7 @@ public class ExampleSimple {
 								});
 							}
 						}
-						peer.addNewReceivedData(newData);
+						peer.addNewPutData(newPutData);
 					}
 				}
 			}
