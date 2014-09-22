@@ -459,10 +459,8 @@ public class ExampleSimple {
 		});
 
 		es.shell.open();
-		//
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
-
 			@Override
 			public void run() {
 				for (final Map.Entry<String, Contact> knownPeer : es.knownPeers
@@ -481,7 +479,6 @@ public class ExampleSimple {
 							for (final Map.Entry<Number160, Data> entry : newData
 									.entrySet()) {
 								es.display.syncExec(new Runnable() {
-
 									@Override
 									public void run() {
 										es.pushTextToStream(peer,
