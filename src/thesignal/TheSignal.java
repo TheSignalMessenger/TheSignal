@@ -19,24 +19,26 @@ import thesignal.ui.TSBaseList;
 import thesignal.ui.TSMessageCellRenderer;
 
 public class TheSignal extends JFrame {
-	private JTextField messageInput;
+	private JTextField mMessageInput;
 	private DefaultListModel messagesListModel;
+	private DefaultListModel groupsListModel;
 	private JList messagesList;
+	private JList groupsList;
 
 	private class MessageSendListener implements ActionListener
 	{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			String text = messageInput.getText().trim();
+			String text = mMessageInput.getText().trim();
 			if(!text.isEmpty())
 			{
 				messagesListModel.addElement(new TSMessage(text));
 				messagesList.ensureIndexIsVisible(messagesList.getModel().getSize() - 1);
 			}
 			
-			messageInput.setText(null);
-			messageInput.requestFocusInWindow();
+			mMessageInput.setText(null);
+			mMessageInput.requestFocusInWindow();
 		}
 		
 	}
@@ -45,26 +47,56 @@ public class TheSignal extends JFrame {
 		setTitle("Simple example");
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+
 		JComponent newContentPane = new JPanel(new BorderLayout());
+		
+		JTextField messageInputField = initializeTextInput();
+		JScrollPane messagesListScrollPane = initializeMessagesList();
+		JScrollPane groupsListScrollPane = initializeGroupsList();
+		
+		newContentPane.add(messagesListScrollPane, BorderLayout.CENTER);
+		newContentPane.add(messageInputField, BorderLayout.PAGE_END);
+		newContentPane.add(groupsListScrollPane, BorderLayout.EAST);
+
+		setContentPane(newContentPane);
+
+		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+	}
+	
+	private JTextField initializeTextInput()
+	{
+		mMessageInput = new JTextField();
+		mMessageInput.addActionListener(new MessageSendListener());
+		
+		return mMessageInput;
+	}
+
+	private JScrollPane initializeMessagesList()
+	{
 		messagesListModel = new DefaultListModel();
-		messagesListModel.addElement(new TSMessage("fsdagdfsghds"));
-		messagesListModel.addElement(new TSMessage("dfsdagdag"));
 		messagesList = new TSBaseList(messagesListModel);
 		JScrollPane listScrollPane = new JScrollPane(messagesList);
 		messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		messagesList.setVisibleRowCount(5);
 
 		messagesList.setCellRenderer(new TSMessageCellRenderer());
-		newContentPane.add(listScrollPane, BorderLayout.CENTER);
-		setContentPane(newContentPane);
 
-		messageInput = new JTextField();
-		messageInput.addActionListener(new MessageSendListener());
-		newContentPane.add(messageInput, BorderLayout.PAGE_END);
-
-		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		return listScrollPane;
 	}
+	
+	private JScrollPane initializeGroupsList()
+	{
+		groupsListModel = new DefaultListModel();
+		groupsList = new TSBaseList(groupsListModel);
+		JScrollPane groupsScrollPane = new JScrollPane(groupsList);
+		groupsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		groupsList.setVisibleRowCount(5);
 
+		groupsList.setCellRenderer(new TSMessageCellRenderer());
+
+		return groupsScrollPane;
+	}
+	
 	public static void main(String[] args) {
 
 		EventQueue.invokeLater(new Runnable() {
