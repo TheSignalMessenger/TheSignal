@@ -11,11 +11,26 @@ public class Bus {
 		// @todo
 	}
 
-	public void raise(Event vent) {
+	public void raise(Event event) {
 		// @todo
 	}
 	
-	public void register(EventListener listener) {
-		// @todo
+	/**
+	 * @todo reflection magic
+	 * @todo Exception werfen, wenn zwei CommandHandler auf das gleiche Command registriert werden
+	 * @param commandHandler
+	 */
+	public void register(CommandHandler commandHandler) {
+		/*
+	 	commands = ListAllClassesThatImplementTheCommandInterface
+		for(Command command:commands) {
+			commandHandler.getMethodsThatHaveExactlyOneArgumentOfType(command)
+			commandHandler(command, this)
+		}
+		*/
+	}
+	
+	public void register(EventListener eventListener) {
+		
 	}
 }
