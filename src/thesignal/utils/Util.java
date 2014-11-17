@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
-import thesignal.entity.Message;
+import thesignal.dht.TSDHTMessage;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
@@ -96,9 +96,9 @@ public final class Util {
 		String message = "";
 		Object dataObject = null;
 		try {
-			Message msg;
+			TSDHTMessage msg;
 			dataObject = data.getObject();
-			msg = (Message) dataObject;
+			msg = (TSDHTMessage) dataObject;
 			message = msg.message;
 		} catch (ClassNotFoundException e1) {
 			// e1.printStackTrace();
@@ -115,7 +115,7 @@ public final class Util {
 	{
 		long createdMS = data.getCreated();
 		try {
-			Message msg = (Message) data.getObject();
+			TSDHTMessage msg = (TSDHTMessage) data.getObject();
 			createdMS = msg.createdDateTime;
 		} catch (ClassNotFoundException e) {
 			// e.printStackTrace();

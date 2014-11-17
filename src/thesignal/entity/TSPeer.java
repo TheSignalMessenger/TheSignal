@@ -2,6 +2,7 @@ package thesignal.entity;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import net.tomp2p.peers.Number160;
@@ -11,7 +12,14 @@ import thesignal.utils.Pair;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.TreeMultimap;
 
-public class Contact {
+enum TSVerificationChannel 
+{
+	DHT
+}
+
+public class TSPeer {
+	private HashSet<TSVerificationChannel> verificationChannels;
+	
 	public static final int putCode = 0;
 	public static final int getCode = 1;
 
@@ -23,7 +31,7 @@ public class Contact {
 	public final HashMap<Number160, Data> putData = new HashMap<Number160, Data>();
 	public Number160 nextPutContentKey = new Number160(0);
 
-	public Contact(String name) {
+	public TSPeer(String name) {
 		this.name = name;
 		peerHash = Number160.createHash(name);
 	}

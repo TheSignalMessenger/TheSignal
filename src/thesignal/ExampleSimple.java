@@ -41,8 +41,8 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
-import thesignal.entity.Contact;
-import thesignal.entity.Message;
+import thesignal.dht.TSDHTMessage;
+import thesignal.entity.TSPeer;
 import thesignal.utils.Pair;
 import thesignal.utils.Util;
 import net.tomp2p.futures.FutureDHT;
@@ -56,8 +56,7 @@ import net.tomp2p.storage.Data;
 public class ExampleSimple {
 	final static String nodeName = "/the/signal";
 
-	public final static Preferences prefs = Preferences.userRoot().node(
-			nodeName);
+	public final static Preferences prefs = Preferences.userRoot().node(nodeName);
 
 	final private Peer tomP2PPeer;
 	final private String ownName;
@@ -83,7 +82,7 @@ public class ExampleSimple {
 	private Preferences prefNextPutContentKeys = prefs
 			.node(prefKeyNextPutContentKeys);
 
-	private HashMap<String, Contact> knownPeers;
+	private HashMap<String, TSPeer> knownPeers;
 
 	private TreeMultimap<Long, Label> dateTimeLabels = TreeMultimap.create(
 			Ordering.natural(), Ordering.arbitrary());
@@ -119,10 +118,10 @@ public class ExampleSimple {
 		} while (!success);
 	}
 
-	private void pushTextToStream(Contact peer, Data data, int typeCode) {
+	private void pushTextToStream(TSPeer peer, Data data, int typeCode) {
 		if (peer.name.equals(currentPeer)) {
 			final String labelText;
-			if (typeCode == Contact.getCode) {
+			if (typeCode == TSPeer.getCode) {
 				labelText = generateReceivedMessageString(peer, data);
 			} else {
 				labelText = generatePutMessageString(ownName, data);
@@ -188,7 +187,7 @@ public class ExampleSimple {
 			FutureDHT putDHT = null;
 			if (groupList.getSelection().length == 1) {
 				recipient = groupList.getSelection()[0].getText();
-				Contact peer = knownPeers.get(recipient);
+				TSPeer peer = knownPeers.get(recipient);
 				try {
 					putDHT = store(peer.peerHash, ownLocation,
 							peer.nextPutContentKey, input);
@@ -197,7 +196,7 @@ public class ExampleSimple {
 								+ peer.nextPutContentKey.toString()
 								+ " for peer " + recipient);
 						HashMap<Number160, Data> map = new HashMap<Number160, Data>();
-						Message msg = new Message();
+						TSDHTMessage msg = new TSDHTMessage();
 						msg.createdDateTime = new Date().getTime();
 						msg.message = input;
 						map.put(peer.nextPutContentKey, new Data(msg));
@@ -254,16 +253,15 @@ public class ExampleSimple {
 		
 		for (int i = 1; i < args.length; ++i) {
 			if (es.prefKnownPeers.get(args[i], "").isEmpty()) {
-				es.prefKnownPeers.put(args[i], Number160.createHash(args[i])
-						.toString());
+				es.prefKnownPeers.put(args[i], Number160.createHash(args[i]).toString());
 			}
 		}
 		es.prefKnownPeers.flush();
 
-		es.knownPeers = new HashMap<String, Contact>(
+		es.knownPeers = new HashMap<String, TSPeer>(
 				es.prefKnownPeers.keys().length);
 		for (String peerName : es.prefKnownPeers.keys()) {
-			Contact peer = new Contact(peerName);
+			TSPeer peer = new TSPeer(peerName);
 
 			peer.nextPutContentKey = es.getNextContentKey(peer.peerHash,
 					es.ownLocation);
@@ -278,7 +276,7 @@ public class ExampleSimple {
 			Map<Number160, Data> putData = es.getPutData(peer);
 			if (putData != null) {
 				for (Map.Entry<Number160, Data> entry : putData.entrySet()) {
-					es.pushTextToStream(peer, entry.getValue(), Contact.putCode);
+					es.pushTextToStream(peer, entry.getValue(), TSPeer.putCode);
 					peer.addNewPutData(putData);
 				}
 			}
@@ -368,11 +366,11 @@ public class ExampleSimple {
 							.getSystemColor(SWT.COLOR_DARK_GREEN));
 					Data data = null;
 					String labelText = "";
-					if (dataCode == Contact.getCode) {
+					if (dataCode == TSPeer.getCode) {
 						data = receivedData.get(contentKey);
 						labelText = es.generateReceivedMessageString(
 								es.knownPeers.get(es.currentPeer), data);
-					} else if (dataCode == Contact.putCode) {
+					} else if (dataCode == TSPeer.putCode) {
 						data = putData.get(contentKey);
 						labelText = es.generatePutMessageString(args[0], data);
 					}
@@ -465,10 +463,10 @@ public class ExampleSimple {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				for (final Map.Entry<String, Contact> knownPeer : es.knownPeers
+				for (final Map.Entry<String, TSPeer> knownPeer : es.knownPeers
 						.entrySet()) {
 					Map<Number160, Data> newData = null;
-					final Contact peer = knownPeer.getValue();
+					final TSPeer peer = knownPeer.getValue();
 					if (peer.peerHash.equals(es.ownLocation)) {
 						continue;
 					}
@@ -485,7 +483,7 @@ public class ExampleSimple {
 									public void run() {
 										es.pushTextToStream(peer,
 												entry.getValue(),
-												Contact.getCode);
+												TSPeer.getCode);
 									}
 								});
 							}
@@ -505,7 +503,7 @@ public class ExampleSimple {
 									public void run() {
 										es.pushTextToStream(peer,
 												entry.getValue(),
-												Contact.putCode);
+												TSPeer.putCode);
 									}
 								});
 							}
@@ -539,7 +537,7 @@ public class ExampleSimple {
 
 	private FutureDHT store(Number160 location, Number160 domain,
 			Number160 contentKey, String value) throws IOException {
-		Message msg = new Message();
+		TSDHTMessage msg = new TSDHTMessage();
 		msg.createdDateTime = new Date().getTime();
 		msg.message = value;
 		FutureDHT fut = tomP2PPeer.put(location)
@@ -548,7 +546,7 @@ public class ExampleSimple {
 		return fut;
 	}
 
-	private Map<Number160, Data> getNewData(Contact contact) {
+	private Map<Number160, Data> getNewData(TSPeer contact) {
 		FutureDHT futureDHT = tomP2PPeer.get(ownLocation)
 				.setDomainKey(contact.peerHash).setAll(true).start();
 		futureDHT.awaitUninterruptibly();
@@ -562,7 +560,7 @@ public class ExampleSimple {
 		return newData;
 	}
 
-	private Map<Number160, Data> getPutData(Contact peer) {
+	private Map<Number160, Data> getPutData(TSPeer peer) {
 		FutureDHT futureDHT = tomP2PPeer.get(peer.peerHash)
 				.setDomainKey(ownLocation).setAll(true).start();
 		futureDHT.awaitUninterruptibly();
@@ -597,7 +595,7 @@ public class ExampleSimple {
 		return retVal;
 	}
 
-	public String generateReceivedMessageString(Contact peer, Data data) {
+	public String generateReceivedMessageString(TSPeer peer, Data data) {
 		return Util.getLocaleFormattedCreationDateTimeString(data) + " - "
 				+ peer.name + ": " + Util.getMessageFromData(data);
 	}
