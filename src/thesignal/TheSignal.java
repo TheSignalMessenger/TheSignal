@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
+import java.util.Random;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
@@ -36,6 +38,14 @@ public class TheSignal extends JFrame {
 			String text = mMessageInput.getText().trim();
 			if(!text.isEmpty())
 			{
+				// Just for testing create a dummy event and let it get handled...
+				MessageReceived dummyEvent = new MessageReceived();
+				Date date = new Date();
+				int secondDiff = new Random(date.getTime()).nextInt(121) - 60;
+				dummyEvent.message = new TSMessage(date.toString() + (secondDiff<0?" - ":" + ") + Math.abs(secondDiff) + ": " + text, null, new Date(date.getTime() + secondDiff * 1000));
+				messagesListModel.handleEvent(dummyEvent);
+				// Testing done...
+
 				messagesList.ensureIndexIsVisible(messagesList.getModel().getSize() - 1);
 			}
 			
