@@ -15,7 +15,7 @@ public class TSMessageCellRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent(JList list, Object value,
 			int index, boolean isSelected, boolean cellHasFocus) {
 		TSMessage message = (TSMessage) value;
-		JLabel component = new JLabel(message.getPayload());
+		JLabel component = new JLabel(message.getTimestamp().toString() + ": " + message.getPayload());
 		component.setOpaque(true);
 		if(isSelected)
 		{
