@@ -12,15 +12,18 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 
+import thesignal.bus.events.MessageReceived;
 import thesignal.entity.TSMessage;
 import thesignal.ui.TSBaseList;
 import thesignal.ui.TSMessageCellRenderer;
+import thesignal.ui.TSMessageListModel;
 
 public class TheSignal extends JFrame {
 	private JTextField mMessageInput;
-	private DefaultListModel messagesListModel;
+	private TSMessageListModel messagesListModel;
 	private DefaultListModel groupsListModel;
 	private JList messagesList;
 	private JList groupsList;
@@ -33,7 +36,6 @@ public class TheSignal extends JFrame {
 			String text = mMessageInput.getText().trim();
 			if(!text.isEmpty())
 			{
-				messagesListModel.addElement(new TSMessage(text));
 				messagesList.ensureIndexIsVisible(messagesList.getModel().getSize() - 1);
 			}
 			
@@ -73,7 +75,7 @@ public class TheSignal extends JFrame {
 
 	private JScrollPane initializeMessagesList()
 	{
-		messagesListModel = new DefaultListModel();
+		messagesListModel = new TSMessageListModel();
 		messagesList = new TSBaseList(messagesListModel);
 		JScrollPane listScrollPane = new JScrollPane(messagesList);
 		messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
