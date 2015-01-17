@@ -23,7 +23,7 @@ public class Bus {
 	}
 
 	public void raise(Event event) {
-		// @todo
+		// 
 	}
 	
 	/**
@@ -36,6 +36,22 @@ public class Bus {
 			throw new TooManyCommandHandlersExceptions();
 		}
 		commandHandlers.put(commandName, commandHandler);
+	}
+	
+	/**
+	 * @param commandHandler
+	 * @param commandName
+	 * @throws UnregisterException
+	 */
+	public void unregister(CommandHandler<?> commandHandler, String commandName)
+			throws UnregisterException {
+		if (!commandHandlers.containsKey(commandName)) {
+			throw new UnregisterException();
+		}
+		if (commandHandlers.get(commandName).equals(commandHandler)) {
+			throw new UnregisterException();
+		}
+		commandHandlers.remove(commandName);
 	}
 	
 	public void register(EventListener eventListener) {

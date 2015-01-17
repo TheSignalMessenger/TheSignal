@@ -2,6 +2,6 @@ package thesignal;
 
 import thesignal.bus.Command;
 
-public class TestCommand extends Command {
+public class TestCommand implements Command {
 
 }
