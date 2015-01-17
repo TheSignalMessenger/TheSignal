@@ -49,6 +49,8 @@ public class TheSignal extends JFrame {
 		Bus bus = new Bus();
 		try {
 			TestHandler testHandler = new TestHandler();
+			TestListener testListener = new TestListener();
+			bus.register(testListener);
 			bus.register(testHandler, TestCommand.class.getName());
 			bus.handle(new AcknowledgeMessage());
 			bus.handle(new TestCommand());

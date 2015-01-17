@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 public class Bus {
 	private HashMap<String, CommandHandler<?>> commandHandlers = new HashMap<String, CommandHandler<?>>();
-	private ArrayList<EventListener> eventListener = new ArrayList<EventListener>();
+	private ArrayList<EventListener> eventListeners = new ArrayList<EventListener>();
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	
 	public void handle(Command command) {
@@ -23,7 +23,9 @@ public class Bus {
 	}
 
 	public void raise(Event event) {
-		// 
+		for(EventListener eventListener : eventListeners) {
+			System.err.println("ABCABC");
+		}
 	}
 	
 	/**
@@ -54,7 +56,10 @@ public class Bus {
 		commandHandlers.remove(commandName);
 	}
 	
+	/**
+	 * @param eventListener
+	 */
 	public void register(EventListener eventListener) {
-		this.eventListener.add(eventListener);
+		this.eventListeners.add(eventListener);
 	}
 }
