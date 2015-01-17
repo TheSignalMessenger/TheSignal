@@ -14,20 +14,20 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
+import thesignal.entity.TSGroup;
 import thesignal.entity.TSMessage;
 import thesignal.ui.TSBaseList;
 import thesignal.ui.TSMessageCellRenderer;
 
 public class TheSignal extends JFrame {
 	private JTextField mMessageInput;
-	private DefaultListModel messagesListModel;
-	private DefaultListModel groupsListModel;
-	private JList messagesList;
-	private JList groupsList;
+	private DefaultListModel<TSMessage> messagesListModel;
+	private DefaultListModel<TSGroup> groupsListModel;
+	private JList<TSMessage> messagesList;
+	private JList<TSGroup> groupsList;
 
 	private class MessageSendListener implements ActionListener
 	{
-
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String text = mMessageInput.getText().trim();
@@ -40,7 +40,6 @@ public class TheSignal extends JFrame {
 			mMessageInput.setText(null);
 			mMessageInput.requestFocusInWindow();
 		}
-		
 	}
 	
 	public TheSignal() {
@@ -73,7 +72,7 @@ public class TheSignal extends JFrame {
 
 	private JScrollPane initializeMessagesList()
 	{
-		messagesListModel = new DefaultListModel();
+		messagesListModel = new DefaultListModel<TSMessage>();
 		messagesList = new TSBaseList(messagesListModel);
 		JScrollPane listScrollPane = new JScrollPane(messagesList);
 		messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -86,7 +85,7 @@ public class TheSignal extends JFrame {
 	
 	private JScrollPane initializeGroupsList()
 	{
-		groupsListModel = new DefaultListModel();
+		groupsListModel = new DefaultListModel<TSGroup>();
 		groupsList = new TSBaseList(groupsListModel);
 		JScrollPane groupsScrollPane = new JScrollPane(groupsList);
 		groupsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

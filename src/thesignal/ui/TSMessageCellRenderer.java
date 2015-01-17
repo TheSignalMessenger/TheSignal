@@ -9,8 +9,6 @@ import javax.swing.JList;
 import thesignal.entity.TSMessage;
 
 public class TSMessageCellRenderer extends DefaultListCellRenderer {
-	
-	
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value,
 			int index, boolean isSelected, boolean cellHasFocus) {

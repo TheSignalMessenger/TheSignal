@@ -32,5 +32,4 @@ public class TSBaseList extends JList {
 		setSelectionBackground(Color.CYAN);
 		setSelectionForeground(Color.BLUE);
 	}
-
 }
