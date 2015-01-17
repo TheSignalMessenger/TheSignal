@@ -23,7 +23,14 @@ import thesignal.ui.TSBaseList;
 import thesignal.ui.TSMessageCellRenderer;
 import thesignal.ui.TSMessageListModel;
 
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class TheSignal extends JFrame {
+	// assumes the current class is called logger
+	private final static Logger logger = Logger.getLogger("thesignal");
+	
 	private JTextField mMessageInput;
 	private TSMessageListModel messagesListModel;
 	private DefaultListModel groupsListModel;
@@ -56,7 +63,12 @@ public class TheSignal extends JFrame {
 	}
 	
 	public TheSignal() {
-		setTitle("Simple example");
+		logger.setLevel(Level.CONFIG);
+		ConsoleHandler consoleHandler = new ConsoleHandler();
+		consoleHandler.setLevel(Level.ALL);
+		logger.addHandler(consoleHandler);
+
+		setTitle("The Signal");
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -95,7 +107,7 @@ public class TheSignal extends JFrame {
 
 		return listScrollPane;
 	}
-	
+
 	private JScrollPane initializeGroupsList()
 	{
 		groupsListModel = new DefaultListModel();
