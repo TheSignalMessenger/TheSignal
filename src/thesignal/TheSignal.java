@@ -14,6 +14,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
+import thesignal.bus.Bus;
+import thesignal.bus.commands.AcknowledgeMessage;
 import thesignal.entity.TSGroup;
 import thesignal.entity.TSMessage;
 import thesignal.ui.TSBaseList;
@@ -43,7 +45,10 @@ public class TheSignal extends JFrame {
 	}
 	
 	public TheSignal() {
-		setTitle("Simple example");
+		Bus bus = new Bus();
+		bus.handle(new AcknowledgeMessage());
+		
+		setTitle("TheSignal Messenger");
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
