@@ -14,10 +14,11 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 
 import thesignal.bus.events.MessageReceived;
+import thesignal.bus.Bus;
+import thesignal.bus.commands.AcknowledgeMessage;
 import thesignal.entity.TSMessage;
 import thesignal.ui.TSBaseList;
 import thesignal.ui.TSMessageCellRenderer;
@@ -39,7 +40,6 @@ public class TheSignal extends JFrame {
 
 	private class MessageSendListener implements ActionListener
 	{
-
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String text = mMessageInput.getText().trim();
@@ -59,7 +59,6 @@ public class TheSignal extends JFrame {
 			mMessageInput.setText(null);
 			mMessageInput.requestFocusInWindow();
 		}
-		
 	}
 	
 	public TheSignal() {
@@ -68,7 +67,10 @@ public class TheSignal extends JFrame {
 		consoleHandler.setLevel(Level.ALL);
 		logger.addHandler(consoleHandler);
 
-		setTitle("The Signal");
+		Bus bus = new Bus();
+		bus.handle(new AcknowledgeMessage());
+		
+		setTitle("TheSignal Messenger");
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 

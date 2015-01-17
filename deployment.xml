@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project TheSignal">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <target name="create_run_jar">
+        <jar destfile="D:/Projects/TheSignal/repo/dist/TheSignal-QuickStartTutorial.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="thesignal.QuickStartTutorial"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="D:/Projects/TheSignal/repo/target/classes"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/born/.m2/repository/net/tomp2p/TomP2P/4.4/TomP2P-4.4.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/born/.m2/repository/io/netty/netty/3.5.3.Patched/netty-3.5.3.Patched.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/born/.m2/repository/jdbm/jdbm/3.0-alpha/jdbm-3.0-alpha.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/born/.m2/repository/org/slf4j/slf4j-api/1.6.4/slf4j-api-1.6.4.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/born/.m2/repository/org/slf4j/slf4j-simple/1.7.7/slf4j-simple-1.7.7.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="C:/Users/born/.m2/repository/org/eclipse/swt/org.eclipse.swt.win32.win32.x86_64/4.4/org.eclipse.swt.win32.win32.x86_64-4.4.jar"/>
+        </jar>
+    </target>
+</project>
