@@ -1,5 +1,5 @@
 package thesignal.bus;
 
-public interface CommandHandler {
-	abstract void handle(Command command, Bus bus);
+public interface CommandHandler<T extends Command> {
+	public void handle(T command, Bus bus);
 }

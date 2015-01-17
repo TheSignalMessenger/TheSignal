@@ -1,5 +1,5 @@
 package thesignal.bus;
 
-public interface Command {
+abstract public class Command {
 
 }

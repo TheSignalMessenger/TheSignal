@@ -15,6 +15,7 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
 import thesignal.bus.Bus;
+import thesignal.bus.TooManyCommandHandlersExceptions;
 import thesignal.bus.commands.AcknowledgeMessage;
 import thesignal.entity.TSGroup;
 import thesignal.entity.TSMessage;
@@ -46,7 +47,14 @@ public class TheSignal extends JFrame {
 	
 	public TheSignal() {
 		Bus bus = new Bus();
-		bus.handle(new AcknowledgeMessage());
+		try {
+			TestHandler testHandler = new TestHandler();
+			bus.register(testHandler, TestCommand.class.getName());
+			bus.handle(new AcknowledgeMessage());
+			bus.handle(new TestCommand());
+		}
+		catch(TooManyCommandHandlersExceptions e) {
+		}
 		
 		setTitle("TheSignal Messenger");
 		setLocationRelativeTo(null);
