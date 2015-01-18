@@ -39,6 +39,8 @@ public class TheSignal extends JFrame {
 	private JList messagesList;
 	private JList groupsList;
 
+	Bus bus = new Bus();
+
 	private class MessageSendListener implements ActionListener
 	{
 		@Override
@@ -68,7 +70,6 @@ public class TheSignal extends JFrame {
 		consoleHandler.setLevel(Level.ALL);
 		logger.addHandler(consoleHandler);
 
-		Bus bus = new Bus();
 		try {
 			TestHandler testHandler = new TestHandler();
 			TestListener testListener = new TestListener();
