@@ -18,7 +18,7 @@ import javax.swing.ListSelectionModel;
 
 import thesignal.bus.events.MessageReceived;
 import thesignal.bus.Bus;
-import thesignal.bus.TooManyCommandHandlersExceptions;
+import thesignal.bus.RegisterException;
 import thesignal.bus.commands.AcknowledgeMessage;
 import thesignal.entity.TSMessage;
 import thesignal.ui.TSBaseList;
@@ -73,12 +73,15 @@ public class TheSignal extends JFrame {
 		try {
 			TestHandler testHandler = new TestHandler();
 			TestListener testListener = new TestListener();
-			bus.register(testListener);
 			bus.register(testHandler, TestCommand.class.getName());
+			bus.register(testListener, TestEvent.class.getName());
 			bus.handle(new AcknowledgeMessage());
 			bus.handle(new TestCommand());
+			bus.raise(new TestEvent());
+			bus.register(testListener, TestEvent.class.getName());
 		}
-		catch(TooManyCommandHandlersExceptions e) {
+		catch(RegisterException e) {
+			logger.severe(e.getMessage());
 		}
 		
 		setTitle("TheSignal Messenger");
