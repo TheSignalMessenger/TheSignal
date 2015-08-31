@@ -54,4 +54,5 @@ public class TSGroup {
 	{
 		return members.contains(peer);
 	}
+	public String peerHash;
 }

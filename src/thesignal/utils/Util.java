@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
-import thesignal.dht.TSDHTMessage;
+import thesignal.entity.DHTMessage;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
@@ -96,10 +96,10 @@ public final class Util {
 		String message = "";
 		Object dataObject = null;
 		try {
-			TSDHTMessage msg;
+			DHTMessage msg;
 			dataObject = data.getObject();
-			msg = (TSDHTMessage) dataObject;
-			message = msg.message;
+			msg = (DHTMessage) dataObject;
+			message = msg.payload;
 		} catch (ClassNotFoundException e1) {
 			// e1.printStackTrace();
 		} catch (IOException e1) {
@@ -109,28 +109,5 @@ public final class Util {
 			message = dataObject.toString();
 		}
 		return message;
-	}
-	
-	public static Date getDate(Data data)
-	{
-		long createdMS = data.getCreated();
-		try {
-			TSDHTMessage msg = (TSDHTMessage) data.getObject();
-			createdMS = msg.createdDateTime;
-		} catch (ClassNotFoundException e) {
-			// e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassCastException e) {
-		}
-		return new Date(createdMS);
-	}
-	
-	public static String getLocaleFormattedCreationDateTimeString(Data data)
-	{
-		Date created = getDate(data);
-		DateFormat formatter = SimpleDateFormat.getDateTimeInstance();
-		return formatter.format(created);
 	}
 }

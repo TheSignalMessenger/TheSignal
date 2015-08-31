@@ -2,8 +2,11 @@ package thesignal;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Array;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Random;
 
@@ -17,12 +20,20 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
 import net.tomp2p.peers.Number160;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 import thesignal.bus.events.MessageReceived;
 import thesignal.bus.Bus;
 import thesignal.bus.RegisterException;
 import thesignal.bus.commands.AcknowledgeMessage;
-import thesignal.dht.TSDHT;
+import thesignal.entity.DHTMessage;
 import thesignal.entity.TSDHTToUILink;
+import thesignal.entity.TSGroup;
+import thesignal.entity.TSPeer;
+import thesignal.dht.ContentKeyFactory;
+import thesignal.dht.usecase.SendMessageToDHT;
 import thesignal.entity.TSMessage;
 import thesignal.ui.TSBaseList;
 import thesignal.ui.TSMessageCellRenderer;
@@ -35,7 +46,7 @@ import java.util.logging.Logger;
 public class TheSignal extends JFrame {
 	// assumes the current class is called logger
 	private final static Logger logger = Logger.getLogger("thesignal");
-	
+
 	private JTextField mMessageInput;
 	private TSMessageListModel messagesListModel;
 	private DefaultListModel groupsListModel;
@@ -43,30 +54,38 @@ public class TheSignal extends JFrame {
 	private JList groupsList;
 
 	private TSDHTToUILink link;
-	
-	private class MessageSendListener implements ActionListener
-	{
+
+	private class MessageSendListener implements ActionListener {
+		Bus bus = new Bus();
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String text = mMessageInput.getText().trim();
-			if(!text.isEmpty())
-			{
-				// Just for testing create a dummy event and let it get handled...
+			if (!text.isEmpty()) {
+				// Just for testing create a dummy event and let it get
+				// handled...
 				MessageReceived dummyEvent = new MessageReceived();
 				Date date = new Date();
+				TSPeer sender = new TSPeer("Todo");
+				TSGroup receiver = new TSGroup("Todo", Arrays.asList(sender));
 				int secondDiff = new Random(date.getTime()).nextInt(121) - 60;
-				dummyEvent.message = new TSMessage(date.toString() + (secondDiff<0?" - ":" + ") + Math.abs(secondDiff) + ": " + text, null, new Date(date.getTime() + secondDiff * 1000));
+				dummyEvent.message = new TSMessage(date.toString()
+						+ (secondDiff < 0 ? " - " : " + ")
+						+ Math.abs(secondDiff) + ": " + text, sender, receiver,
+						new Date(date.getTime() + secondDiff * 1000));
 				messagesListModel.handleEvent(dummyEvent);
 				// Testing done...
 
-				messagesList.ensureIndexIsVisible(messagesList.getModel().getSize() - 1);
+				messagesList.ensureIndexIsVisible(messagesList
+					.getModel()
+					.getSize() - 1);
 			}
-			
+
 			mMessageInput.setText(null);
 			mMessageInput.requestFocusInWindow();
 		}
 	}
-	
+
 	public TheSignal(String ownName, Number160 ownHash) {
 		logger.setLevel(Level.CONFIG);
 		ConsoleHandler consoleHandler = new ConsoleHandler();
@@ -78,11 +97,11 @@ public class TheSignal extends JFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		JComponent newContentPane = new JPanel(new BorderLayout());
-		
+
 		JTextField messageInputField = initializeTextInput();
 		JScrollPane messagesListScrollPane = initializeMessagesList();
 		JScrollPane groupsListScrollPane = initializeGroupsList();
-		
+
 		newContentPane.add(messagesListScrollPane, BorderLayout.CENTER);
 		newContentPane.add(messageInputField, BorderLayout.PAGE_END);
 		newContentPane.add(groupsListScrollPane, BorderLayout.EAST);
@@ -90,20 +109,18 @@ public class TheSignal extends JFrame {
 		setContentPane(newContentPane);
 
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
-		
-		link = new TSDHTToUILink(new TSDHT(ownName, ownHash));
+
+		link = new TSDHTToUILink();
 	}
-	
-	private JTextField initializeTextInput()
-	{
+
+	private JTextField initializeTextInput() {
 		mMessageInput = new JTextField();
 		mMessageInput.addActionListener(new MessageSendListener());
-		
+
 		return mMessageInput;
 	}
 
-	private JScrollPane initializeMessagesList()
-	{
+	private JScrollPane initializeMessagesList() {
 		messagesListModel = new TSMessageListModel();
 		messagesList = new TSBaseList(messagesListModel);
 		JScrollPane listScrollPane = new JScrollPane(messagesList);
@@ -115,8 +132,7 @@ public class TheSignal extends JFrame {
 		return listScrollPane;
 	}
 
-	private JScrollPane initializeGroupsList()
-	{
+	private JScrollPane initializeGroupsList() {
 		groupsListModel = new DefaultListModel();
 		groupsList = new TSBaseList(groupsListModel);
 		JScrollPane groupsScrollPane = new JScrollPane(groupsList);
@@ -127,18 +143,17 @@ public class TheSignal extends JFrame {
 
 		return groupsScrollPane;
 	}
-	
-	public static void main(final String[] args) {
 
+	public static void main(final String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				TheSignal ex = new TheSignal(args[0], Number160.createHash(args[0]));
+				TheSignal ex = new TheSignal(args[0], Number160
+					.createHash(args[0]));
 				ex.setVisible(true);
 			}
 		});
 	}
-
 }
 
 /* ListDemo.java requires no other files. */

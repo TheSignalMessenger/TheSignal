@@ -5,4 +5,8 @@ import thesignal.entity.TSMessage;
 
 public class MessageSent implements Event {
 	public TSMessage message;
+
+	public MessageSent(TSMessage message) {
+		this.message = message;
+	}
 }

@@ -41,7 +41,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
-import thesignal.dht.TSDHTMessage;
+import thesignal.entity.DHTMessage;
 import thesignal.entity.TSPeer;
 import thesignal.utils.Pair;
 import thesignal.utils.Util;
@@ -98,15 +98,15 @@ public class ExampleSimple {
 						.nextFloat() * 200.f)).makeAndListen();
 		boolean success = false;
 		do {
-			FutureBootstrap fb = tomP2PPeer
-					.bootstrap()
-					.setInetAddress(
-							InetAddress.getByName("user.nullteilerfrei.de"))
-					.setPorts(4001).start();
 //			FutureBootstrap fb = tomP2PPeer
-//			.bootstrap()
-//			.setInetAddress(InetAddress.getByName("tsp.no-ip.org"))
-//			.setPorts(4242).start();
+//					.bootstrap()
+//					.setInetAddress(
+//							InetAddress.getByName("user.nullteilerfrei.de"))
+//					.setPorts(4242).start();
+			FutureBootstrap fb = tomP2PPeer
+			.bootstrap()
+			.setInetAddress(InetAddress.getByName("tsp.no-ip.org"))
+			.setPorts(4242).start();
 			fb.awaitUninterruptibly();
 			success = fb.isSuccess();
 			if (fb.getBootstrapTo() != null) {
@@ -196,9 +196,9 @@ public class ExampleSimple {
 								+ peer.nextPutContentKey.toString()
 								+ " for peer " + recipient);
 						HashMap<Number160, Data> map = new HashMap<Number160, Data>();
-						TSDHTMessage msg = new TSDHTMessage();
+						DHTMessage msg = new DHTMessage();
 						msg.createdDateTime = new Date().getTime();
-						msg.message = input;
+						msg.payload = input;
 						map.put(peer.nextPutContentKey, new Data(msg));
 						peer.addNewPutData(map);
 						peer.nextPutContentKey = Util
@@ -537,9 +537,9 @@ public class ExampleSimple {
 
 	private FutureDHT store(Number160 location, Number160 domain,
 			Number160 contentKey, String value) throws IOException {
-		TSDHTMessage msg = new TSDHTMessage();
+		DHTMessage msg = new DHTMessage();
 		msg.createdDateTime = new Date().getTime();
-		msg.message = value;
+		msg.payload = value;
 		FutureDHT fut = tomP2PPeer.put(location)
 				.setData(contentKey, new Data(msg)).setDomainKey(domain)
 				.start().awaitUninterruptibly();
