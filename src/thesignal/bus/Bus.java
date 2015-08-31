@@ -101,6 +101,11 @@ public class Bus {
 		listeners.add(eventListener);
 	}
 
+	/**
+	 * @param eventListener
+	 * @param eventName
+	 * @throws UnregisterException
+	 */
 	public void unregister(EventListener<?> eventListener, String eventName)
 			throws UnregisterException {
 		if(eventListener == null)
