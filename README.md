@@ -1,7 +1,14 @@
-h1. Maven
+# TheSignal
+End-to-end encrypted server-free chat application with group support
+
+## Notes
+
+### Maven
+
 * https://www.eclipse.org/m2e/download/
 
-h1. TheSignal source
+### TheSignal source
+
 * git clone ssh://USERNAME@user.nullteilerfrei.de/~born/repub/TheSignal.git
 * Right click in Project Manager
 * New, Maven, New Maven project
@@ -11,13 +18,11 @@ h1. TheSignal source
 * Right click on Project, "Configure", "Convert to Maven project"
 * Right click on Project, "Maven", "Update"
 
-h1. Deployment
+### Deployment
+
 * In eclipse
 * Right click on project
 * Export
 * Java -> Runnable JAR file
 * select correct launch configuration
 * Extract required libraries into generated JAR
-=======
-# TheSignal
-End-to-end encrypted server-free chat application with group support
