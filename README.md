@@ -9,7 +9,7 @@ End-to-end encrypted server-free chat application with group support
 
 ### TheSignal source
 
-* git clone ssh://USERNAME@user.nullteilerfrei.de/~born/repub/TheSignal.git
+* git clone
 * Right click in Project Manager
 * New, Maven, New Maven project
 * Project name: e.g. TheSignal
