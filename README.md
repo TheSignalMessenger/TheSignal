@@ -18,3 +18,6 @@ h1. Deployment
 * Java -> Runnable JAR file
 * select correct launch configuration
 * Extract required libraries into generated JAR
+=======
+# TheSignal
+End-to-end encrypted server-free chat application with group support
