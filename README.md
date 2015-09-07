@@ -26,3 +26,11 @@ End-to-end encrypted server-free chat application with group support
 * Java -> Runnable JAR file
 * select correct launch configuration
 * Extract required libraries into generated JAR
+
+# Developer Documentation
+
+| DHT-Langauge  | TheSignal Language |
+| ------------- |:------------------:|
+| location      | receiver (TSGroup) |
+| domain        | sender (TSPeer)    |
+| entry         | random             |
