@@ -20,6 +20,7 @@ import thesignal.bus.events.MessageReceived;
 import thesignal.bus.Bus;
 import thesignal.bus.RegisterException;
 import thesignal.bus.commands.AcknowledgeMessage;
+import thesignal.entity.TSDHTToUILink;
 import thesignal.entity.TSMessage;
 import thesignal.ui.TSBaseList;
 import thesignal.ui.TSMessageCellRenderer;
@@ -39,8 +40,8 @@ public class TheSignal extends JFrame {
 	private JList messagesList;
 	private JList groupsList;
 
-	Bus bus = new Bus();
-
+	private TSDHTToUILink link = new TSDHTToUILink();
+	
 	private class MessageSendListener implements ActionListener
 	{
 		@Override
@@ -70,20 +71,6 @@ public class TheSignal extends JFrame {
 		consoleHandler.setLevel(Level.ALL);
 		logger.addHandler(consoleHandler);
 
-		try {
-			TestHandler testHandler = new TestHandler();
-			TestListener testListener = new TestListener();
-			bus.register(testHandler, TestCommand.class.getName());
-			bus.register(testListener, TestEvent.class.getName());
-			bus.handle(new AcknowledgeMessage());
-			bus.handle(new TestCommand());
-			bus.raise(new TestEvent());
-			bus.register(testListener, TestEvent.class.getName());
-		}
-		catch(RegisterException e) {
-			logger.severe(e.getMessage());
-		}
-		
 		setTitle("TheSignal Messenger");
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
