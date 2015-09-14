@@ -1,18 +1,9 @@
 package thesignal.entity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.logging.Logger;
 
-import thesignal.TestCommand;
-import thesignal.TestEvent;
-import thesignal.TestHandler;
-import thesignal.TestListener;
-import thesignal.TheSignal;
 import thesignal.bus.Bus;
+import thesignal.bus.Command;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
 import thesignal.bus.RegisterException;
@@ -91,6 +82,10 @@ public class TSDHTToUILink implements EventListener<Event> {
 		{
 			uiBus.raise(event);
 		}
+	}
+
+	public void handle(Command command) {
+		dht.handle(command, uiBus);
 	}
 	
 }
