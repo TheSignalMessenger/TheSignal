@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
@@ -17,7 +18,9 @@ enum TSVerificationChannel
 	DHT
 }
 
-public class TSPeer {
+public class TSPeer implements Comparable<TSPeer> {
+	private Logger logger = Logger.getLogger(this.getClass().getName());
+
 	private HashSet<TSVerificationChannel> verificationChannels;
 	
 	public static final int putCode = 0;
@@ -67,4 +70,22 @@ public class TSPeer {
 	public ImmutableMultimap<Long, Pair<Integer, Number160>> getDataDates() {
 		return ImmutableMultimap.copyOf(dataDates);
 	}
+
+	@Override
+	public int compareTo(TSPeer o) {
+		int hcomp = peerHash.compareTo(o.peerHash);
+		if(hcomp == 0)
+		{
+			int ncomp = name.compareTo(o.name);
+			if(ncomp != 0)
+			{
+				logger.severe("SHA-1 collision found!!!: " + name + " and " + o.name + " both hash to " + peerHash.toString() + "!");
+				assert(false);
+			}
+			return ncomp;
+		}
+		return hcomp;
+	}
+	
+	
 }
