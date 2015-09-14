@@ -5,6 +5,8 @@ import java.util.TreeSet;
 
 import javax.naming.OperationNotSupportedException;
 
+import net.tomp2p.peers.Number160;
+
 public class TSGroup {
 	private String name;
 	private TreeSet<TSPeer> members = new TreeSet<TSPeer>();
@@ -54,5 +56,6 @@ public class TSGroup {
 	{
 		return members.contains(peer);
 	}
-	public String peerHash;
+	
+	public Number160 peerHash;
 }

@@ -18,6 +18,7 @@ import thesignal.bus.events.MessageSent;
 import thesignal.bus.events.SendingMessageFailed;
 import thesignal.dht.ContentKeyFactory;
 import thesignal.entity.DHTMessage;
+import thesignal.repository.PeerRepository;
 import thesignal.service.MeProvider;
 
 @Singleton
@@ -25,6 +26,7 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 	private ContentKeyFactory contentKeyFactory;
 	private MeProvider senderProvider;
 	private Peer tomP2PPeer;
+	private PeerRepository peerRepository;
 
 	@Inject
 	public SendMessageToDHT(MeProvider senderProvider,
@@ -39,12 +41,11 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 
 		FutureDHT putDHT = null;
 		try {
-			Number160 contentKey = this.contentKeyFactory
-				.createFromSenderAndRecipient(command.sender, command.recipient);
+			Number160 contentKey = contentKeyFactory.create();
 
 			putDHT = store(
-				command.recipient.peerHash,
-				senderProvider.get().peerHash,
+				command.message.getReceiver().peerHash,
+				peerRepository.findOne(command.message.getSender()).peerHash,
 				contentKey,
 				message);
 			if (!putDHT.isSuccess()) {
@@ -52,9 +53,6 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 						"putDHT not successfull"));
 				return;
 			}
-			System.out.println("Put " + message + " at content key "
-					+ contentKey.toString() + " for peer "
-					+ command.recipient.name);
 			HashMap<Number160, Data> map = new HashMap<Number160, Data>();
 
 			DHTMessage msg = new DHTMessage();
@@ -62,7 +60,7 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 			msg.payload = message;
 
 			map.put(contentKey, new Data(msg));
-			command.recipient.addNewPutData(map);
+			command.message.getReceiver().addNewPutData(map);
 
 			bus.raise(new MessageSent(command.message));
 		} catch (IOException e) {

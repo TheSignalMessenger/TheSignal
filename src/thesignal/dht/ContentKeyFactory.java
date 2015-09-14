@@ -8,7 +8,7 @@ import thesignal.utils.Util;
 
 @Singleton
 public class ContentKeyFactory {
-	public Number160 createFromSenderAndRecipient(TSPeer sender, TSPeer recipient) {
+	public Number160 create() {
 		return Util.randNumber160();
 	}
 }
