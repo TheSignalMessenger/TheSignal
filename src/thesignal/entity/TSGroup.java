@@ -50,4 +50,8 @@ public class TSGroup {
 		}
 	}
 	
+	public boolean isMember(TSPeer peer)
+	{
+		return members.contains(peer);
+	}
 }
