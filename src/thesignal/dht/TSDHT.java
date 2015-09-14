@@ -31,7 +31,7 @@ public class TSDHT implements CommandHandler<Command> {
 
 	private HashMap<String, TSPeer> knownPeers;
 
-	TSDHT(String name, final Number160 peerHash)
+	public TSDHT(String name, final Number160 peerHash)
 	{
 		ownName = name;
 		ownLocation = peerHash;

@@ -16,10 +16,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
+import net.tomp2p.peers.Number160;
 import thesignal.bus.events.MessageReceived;
 import thesignal.bus.Bus;
 import thesignal.bus.RegisterException;
 import thesignal.bus.commands.AcknowledgeMessage;
+import thesignal.dht.TSDHT;
 import thesignal.entity.TSDHTToUILink;
 import thesignal.entity.TSMessage;
 import thesignal.ui.TSBaseList;
@@ -40,7 +42,7 @@ public class TheSignal extends JFrame {
 	private JList messagesList;
 	private JList groupsList;
 
-	private TSDHTToUILink link = new TSDHTToUILink();
+	private TSDHTToUILink link;
 	
 	private class MessageSendListener implements ActionListener
 	{
@@ -65,7 +67,7 @@ public class TheSignal extends JFrame {
 		}
 	}
 	
-	public TheSignal() {
+	public TheSignal(String ownName, Number160 ownHash) {
 		logger.setLevel(Level.CONFIG);
 		ConsoleHandler consoleHandler = new ConsoleHandler();
 		consoleHandler.setLevel(Level.ALL);
@@ -88,6 +90,8 @@ public class TheSignal extends JFrame {
 		setContentPane(newContentPane);
 
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		
+		link = new TSDHTToUILink(new TSDHT(ownName, ownHash));
 	}
 	
 	private JTextField initializeTextInput()
@@ -124,12 +128,12 @@ public class TheSignal extends JFrame {
 		return groupsScrollPane;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				TheSignal ex = new TheSignal();
+				TheSignal ex = new TheSignal(args[0], Number160.createHash(args[0]));
 				ex.setVisible(true);
 			}
 		});
