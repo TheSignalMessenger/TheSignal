@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import thesignal.bus.Bus;
+import thesignal.bus.Command;
+import thesignal.bus.CommandHandler;
 import thesignal.entity.TSPeer;
 import thesignal.utils.Util;
 import net.tomp2p.futures.FutureBootstrap;
@@ -19,7 +22,7 @@ import net.tomp2p.p2p.PeerMaker;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
-public class TSDHT {
+public class TSDHT implements CommandHandler<Command> {
 	
 	private Peer tomP2PPeer;
 	final private String ownName;
@@ -151,6 +154,12 @@ public class TSDHT {
 			}
 		}
 		return newData;
+	}
+
+	@Override
+	public void handle(Command command, Bus bus) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
