@@ -17,6 +17,8 @@ import thesignal.entity.DHTMessage;
 import thesignal.entity.TSPeer;
 import thesignal.utils.Util;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import net.tomp2p.futures.FutureBootstrap;
@@ -50,7 +52,13 @@ public class MeProvider {
 				// TODO: Handle the cases that either tomP2PPeer or fb aren't
 				// correctly initialized (i.e. == null)...
 				try {
-					tomP2PPeer = new PeerMaker(me.peerHash)
+					Injector injector = Guice.createInjector();
+					PeerHashesWriter writer = injector.getInstance(PeerHashesWriter.class);
+					// @TODO get/generate the Hash the correct way...
+					Number160 meHash = Number160.createHash(me.name);
+					writer.putHash(me, meHash);
+
+					tomP2PPeer = new PeerMaker(meHash)
 						.setPorts(
 							4000 + Math.round(new Random(System
 								.currentTimeMillis()).nextFloat() * 200.f))
