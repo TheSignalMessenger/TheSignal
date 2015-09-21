@@ -38,12 +38,12 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 	@Override
 	public void handle(SendMessage command, Bus bus) {
 		try {
-			FutureDHT putDHT = store(
+			FutureDHT storeOperation = store(
 				command.message.getReceiver().peerHash,
 				peerRepository.findOne(command.message.getSender()).peerHash,
 				contentKeyFactory.create(),
 				command.message.getPayload());
-			if (!putDHT.isSuccess()) {
+			if (!storeOperation.isSuccess()) {
 				bus.raise(new SendingMessageFailed(command.message,
 						"putDHT not successfull"));
 				return;
