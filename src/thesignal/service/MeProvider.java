@@ -25,15 +25,8 @@ import net.tomp2p.storage.Data;
 @Singleton
 public class MeProvider {
 	private TSPeer me;
-	private Peer tomP2PPeer;
-
-	public Peer getTomP2PPeer() {
-		return tomP2PPeer;
-	}
 
 	private AtomicBoolean initialized = new AtomicBoolean(false);
-
-	// private HashMap<String, TSPeer> knownPeers;
 
 	public MeProvider() {
 		// @TODO inject name
@@ -46,12 +39,13 @@ public class MeProvider {
 				// correctly initialized (i.e. == null)...
 				try {
 					Injector injector = Guice.createInjector();
-					PeerHashManager writer = injector.getInstance(PeerHashManager.class);
+					PeerHashManager writer = injector
+						.getInstance(PeerHashManager.class);
 					// @TODO get/generate the Hash the correct way...
 					Number160 meHash = Number160.createHash(me.name);
 					writer.putHash(me, meHash);
 
-					tomP2PPeer = new PeerMaker(meHash)
+					me.dhtPeer = new PeerMaker(meHash)
 						.setPorts(
 							4000 + Math.round(new Random(System
 								.currentTimeMillis()).nextFloat() * 200.f))
@@ -65,7 +59,7 @@ public class MeProvider {
 				do {
 					FutureBootstrap futureBootstrap = null;
 					try {
-						futureBootstrap = tomP2PPeer
+						futureBootstrap = me.dhtPeer
 							.bootstrap()
 							.setInetAddress(
 								InetAddress.getByName("tsp.no-ip.org"))
@@ -80,7 +74,7 @@ public class MeProvider {
 					futureBootstrap.awaitUninterruptibly();
 					success = futureBootstrap.isSuccess();
 					if (futureBootstrap.getBootstrapTo() != null) {
-						FutureDiscover futureDiscover = tomP2PPeer
+						FutureDiscover futureDiscover = me.dhtPeer
 							.discover()
 							.setPeerAddress(
 								futureBootstrap
@@ -96,19 +90,6 @@ public class MeProvider {
 		}).start();
 	}
 
-	private FutureDHT store(Number160 location, Number160 domain,
-			Number160 contentKey, String value) throws IOException {
-		DHTMessage msg = new DHTMessage();
-		msg.createdDateTime = new Date().getTime();
-		msg.payload = value;
-		return tomP2PPeer
-			.put(location)
-			.setData(contentKey, new Data(msg))
-			.setDomainKey(domain)
-			.start()
-			.awaitUninterruptibly();
-	}
-	
 	public TSPeer get() {
 		return me;
 	}

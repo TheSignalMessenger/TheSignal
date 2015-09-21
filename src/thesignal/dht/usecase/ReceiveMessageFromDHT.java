@@ -94,7 +94,7 @@ public class ReceiveMessageFromDHT {
 
 	private Map<Number160, Data> getNewData(TSPeer contact) {
 		FutureDHT futureDHT = meProvider
-			.getTomP2PPeer()
+			.getPeer()
 			.get(meProvider.get().peerHash)
 			.setDomainKey(contact.peerHash)
 			.setAll(true)
@@ -112,7 +112,7 @@ public class ReceiveMessageFromDHT {
 
 	private Map<Number160, Data> getPutData(TSPeer peer) {
 		FutureDHT futureDHT = meProvider
-			.getTomP2PPeer()
+			.getPeer()
 			.get(peer.peerHash)
 			.setDomainKey(meProvider.get().peerHash)
 			.setAll(true)

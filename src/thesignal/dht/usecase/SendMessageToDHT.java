@@ -2,13 +2,11 @@ package thesignal.dht.usecase;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import net.tomp2p.futures.FutureDHT;
-import net.tomp2p.p2p.Peer;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 import thesignal.bus.Bus;
@@ -24,15 +22,15 @@ import thesignal.service.MeProvider;
 @Singleton
 public class SendMessageToDHT implements CommandHandler<SendMessage> {
 	private ContentKeyFactory contentKeyFactory;
-	private MeProvider senderProvider;
-	private Peer tomP2PPeer;
 	private PeerRepository peerRepository;
+	private MeProvider meProvider;
 
 	@Inject
-	public SendMessageToDHT(MeProvider senderProvider,
-			ContentKeyFactory contentKeyFactory) {
-		this.senderProvider = senderProvider;
+	public SendMessageToDHT(PeerRepository peerRepository,
+			ContentKeyFactory contentKeyFactory, MeProvider meProvider) {
 		this.contentKeyFactory = contentKeyFactory;
+		this.peerRepository = peerRepository;
+		this.meProvider = meProvider;
 	}
 
 	@Override
@@ -62,7 +60,7 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 		DHTMessage msg = new DHTMessage();
 		msg.createdDateTime = new Date().getTime();
 		msg.payload = value;
-		return tomP2PPeer
+		return meProvider.get().dhtPeer
 			.put(location)
 			.setData(contentKey, new Data(msg))
 			.setDomainKey(domain)
