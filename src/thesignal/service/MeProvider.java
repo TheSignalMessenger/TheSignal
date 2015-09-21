@@ -7,15 +7,8 @@ import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import thesignal.bus.Bus;
-import thesignal.bus.Command;
-import thesignal.bus.CommandHandler;
-import thesignal.bus.commands.SendMessage;
-import thesignal.bus.events.MessageSent;
-import thesignal.bus.events.SendingMessageFailed;
 import thesignal.entity.DHTMessage;
 import thesignal.entity.TSPeer;
-import thesignal.utils.Util;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
