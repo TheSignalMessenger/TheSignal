@@ -29,8 +29,8 @@ End-to-end encrypted server-free chat application with group support
 
 # Developer Documentation
 
-| DHT-Langauge  | TheSignal Language |
-| ------------- |:------------------:|
-| location      | receiver (TSGroup) |
-| domain        | sender (TSPeer)    |
-| entry         | random             |
+| DHT-Langauge  | TheSignal Language          |
+| ------------- |:---------------------------:|
+| location      | receiver (DHTGroup/TSGroup) |
+| domain        | sender (DHTPeer/TSPeer)     |
+| entry         | random                      |
