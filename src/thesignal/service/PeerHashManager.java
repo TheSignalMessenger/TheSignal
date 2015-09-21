@@ -8,10 +8,10 @@ import thesignal.entity.TSPeer;
 import com.google.inject.Singleton;
 
 @Singleton
-public class PeerHashesWriter {
+public class PeerHashManager {
 	private HashMap<TSPeer, Number160> m_peer2Hash = new HashMap<TSPeer, Number160>();
 
-	public PeerHashesWriter() {
+	public PeerHashManager() {
 	}
 	
 	public Number160 getHash(TSPeer peer)

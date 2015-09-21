@@ -53,7 +53,7 @@ public class MeProvider {
 				// correctly initialized (i.e. == null)...
 				try {
 					Injector injector = Guice.createInjector();
-					PeerHashesWriter writer = injector.getInstance(PeerHashesWriter.class);
+					PeerHashManager writer = injector.getInstance(PeerHashManager.class);
 					// @TODO get/generate the Hash the correct way...
 					Number160 meHash = Number160.createHash(me.name);
 					writer.putHash(me, meHash);
