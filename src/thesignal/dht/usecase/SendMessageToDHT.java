@@ -37,36 +37,24 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 
 	@Override
 	public void handle(SendMessage command, Bus bus) {
-		String message = command.message.getPayload();
-
-		FutureDHT putDHT = null;
 		try {
-			Number160 contentKey = contentKeyFactory.create();
-
-			putDHT = store(
+			FutureDHT putDHT = store(
 				command.message.getReceiver().peerHash,
 				peerRepository.findOne(command.message.getSender()).peerHash,
-				contentKey,
-				message);
+				contentKeyFactory.create(),
+				command.message.getPayload());
 			if (!putDHT.isSuccess()) {
 				bus.raise(new SendingMessageFailed(command.message,
 						"putDHT not successfull"));
 				return;
 			}
-			HashMap<Number160, Data> map = new HashMap<Number160, Data>();
-
-			DHTMessage msg = new DHTMessage();
-			msg.createdDateTime = new Date().getTime();
-			msg.payload = message;
-
-			map.put(contentKey, new Data(msg));
-			command.message.getReceiver().addNewPutData(map);
-
-			bus.raise(new MessageSent(command.message));
 		} catch (IOException e) {
-			bus.raise(new SendingMessageFailed(command.message, "IOException"));
+			bus.raise(new SendingMessageFailed(command.message,
+					"IOException while sending message"));
 			e.printStackTrace();
+			return;
 		}
+		bus.raise(new MessageSent(command.message));
 	}
 
 	private FutureDHT store(Number160 location, Number160 domain,
