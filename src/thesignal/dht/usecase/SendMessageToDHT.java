@@ -16,18 +16,18 @@ import thesignal.bus.events.MessageSent;
 import thesignal.bus.events.SendingMessageFailed;
 import thesignal.dht.ContentKeyFactory;
 import thesignal.entity.DHTMessage;
+import thesignal.repository.MeRepository;
 import thesignal.repository.PeerRepository;
-import thesignal.service.MeProvider;
 
 @Singleton
 public class SendMessageToDHT implements CommandHandler<SendMessage> {
 	private ContentKeyFactory contentKeyFactory;
 	private PeerRepository peerRepository;
-	private MeProvider meProvider;
+	private MeRepository meProvider;
 
 	@Inject
 	public SendMessageToDHT(PeerRepository peerRepository,
-			ContentKeyFactory contentKeyFactory, MeProvider meProvider) {
+			ContentKeyFactory contentKeyFactory, MeRepository meProvider) {
 		this.contentKeyFactory = contentKeyFactory;
 		this.peerRepository = peerRepository;
 		this.meProvider = meProvider;
@@ -38,7 +38,7 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 		try {
 			FutureDHT storeOperation = store(
 				command.message.getReceiver().peerHash,
-				peerRepository.findOne(command.message.getSender()).peerHash,
+				peerRepository.findOne(command.message.getSender()).hash,
 				contentKeyFactory.create(),
 				command.message.getPayload());
 			if (!storeOperation.isSuccess()) {
@@ -60,7 +60,7 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 		DHTMessage msg = new DHTMessage();
 		msg.createdDateTime = new Date().getTime();
 		msg.payload = value;
-		return meProvider.get().dhtPeer
+		return meProvider.getDHTPeer().peer
 			.put(location)
 			.setData(contentKey, new Data(msg))
 			.setDomainKey(domain)

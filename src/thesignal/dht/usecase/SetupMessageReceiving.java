@@ -13,24 +13,28 @@ import thesignal.dht.MessageReceivedFactory;
 import thesignal.entity.DHTGroup;
 import thesignal.repository.GroupRepository;
 import thesignal.repository.KnownPeersRepository;
-import thesignal.service.MeProvider;
+import thesignal.repository.MeRepository;
+import thesignal.repository.PeerHashRepository;
 
 public class SetupMessageReceiving implements EventListener<Connected>{
 
-	private MeProvider meProvider;
+	private MeRepository meProvider;
 	private KnownPeersRepository knownPeersRepository;
 	private MessageReceivedFactory messageReceivedFactory;
 	private GroupRepository groupRepository;
+	private PeerHashRepository peerHashRepository;
 
 	@Inject
-	public SetupMessageReceiving(Bus _bus, MeProvider _meProvider,
+	public SetupMessageReceiving(Bus _bus, MeRepository _meProvider,
 			KnownPeersRepository _knownPeersRepository,
 			GroupRepository _groupRepository,
-			MessageReceivedFactory _messageReceivedFactory) {
+			MessageReceivedFactory _messageReceivedFactory,
+			PeerHashRepository peerHashRepository) {
 		this.meProvider = _meProvider;
 		this.knownPeersRepository = _knownPeersRepository;
 		this.groupRepository = _groupRepository;
 		this.messageReceivedFactory = _messageReceivedFactory;
+		this.peerHashRepository = peerHashRepository;
 	}
 	
 	@Override
@@ -40,6 +44,7 @@ public class SetupMessageReceiving implements EventListener<Connected>{
 			@Override
 			public void run() {
 				for(DHTGroup group : groupRepository.findAll()) {
+					
 					// TODO getPeer 
 					/*
 		FutureDHT futureDHT = meProvider
@@ -58,6 +63,9 @@ public class SetupMessageReceiving implements EventListener<Connected>{
 		}
 		return newData;
 					 */
+					
+					
+					
 				}
 				
 				/*

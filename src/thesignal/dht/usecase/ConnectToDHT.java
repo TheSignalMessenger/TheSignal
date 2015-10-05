@@ -7,6 +7,7 @@ import java.util.Random;
 
 import net.tomp2p.futures.FutureBootstrap;
 import net.tomp2p.futures.FutureDiscover;
+import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerMaker;
 import net.tomp2p.peers.Number160;
 
@@ -18,56 +19,65 @@ import thesignal.bus.Bus;
 import thesignal.bus.EventListener;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.Started;
+import thesignal.entity.DHTPeer;
+import thesignal.manager.MeManager;
 import thesignal.manager.PeerHashManager;
-import thesignal.service.MeProvider;
+import thesignal.repository.MeRepository;
 
-public class ConnectToDHT implements EventListener<Started>{
-	MeProvider meProvider;
+public class ConnectToDHT implements EventListener<Started> {
+	MeManager meManager;
+	PeerHashManager peerHashManager;
 	String bootstrapHost;
 	Integer port;
-	
+
 	@Inject
-	public ConnectToDHT(MeProvider meProvider) {
-		this.meProvider = meProvider;
+	public ConnectToDHT(MeManager meManager, PeerHashManager peerHashManager) {
+		this.peerHashManager = peerHashManager;
+		this.meManager = meManager;
 		this.bootstrapHost = "tsp.no-ip.org";
 		// or "user.nullteilerfrei.de"
-		
+
 		this.port = 4242;
 	}
-	
+
 	@Override
 	public void handle(Started event, final Bus bus) {
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
+				DHTPeer dhtPeer;
+
 				// TODO: Handle the cases that either tomP2PPeer or fb aren't
 				// correctly initialized (i.e. == null)...
 				try {
-					Injector injector = Guice.createInjector();
-					PeerHashManager writer = injector
-						.getInstance(PeerHashManager.class);
-					// @TODO get/generate the Hash the correct way...
-					Number160 meHash = Number160.createHash(meProvider.get().name);
-					writer.putHash(meProvider.get(), meHash);
+					// TODO get/generate the Hash the correct way...
+					Number160 hash = Number160.createHash("foobar");
 
-					meProvider.get().dhtPeer = new PeerMaker(meHash)
+					// TODO fix port
+					Peer peer = new PeerMaker(hash)
 						.setPorts(
 							4000 + Math.round(new Random(System
 								.currentTimeMillis()).nextFloat() * 200.f))
 						.makeAndListen();
+
+					dhtPeer = new DHTPeer(hash, peer);
+					meManager.setDHTPeer(dhtPeer);
+					peerHashManager.put(dhtPeer, hash);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// TODO do something smart in case of Exception
 					e.printStackTrace();
+					return;
 				}
 
 				boolean success = false;
 				do {
 					FutureBootstrap futureBootstrap = null;
 					try {
-						futureBootstrap = meProvider.get().dhtPeer
+						futureBootstrap = dhtPeer.peer
 							.bootstrap()
-							.setInetAddress(InetAddress.getByName(bootstrapHost))
+							.setInetAddress(
+								InetAddress.getByName(bootstrapHost))
 							.setPorts(port)
 							.start();
 					} catch (UnknownHostException e) {
@@ -77,7 +87,7 @@ public class ConnectToDHT implements EventListener<Started>{
 					futureBootstrap.awaitUninterruptibly();
 					success = futureBootstrap.isSuccess();
 					if (futureBootstrap.getBootstrapTo() != null) {
-						FutureDiscover futureDiscover = meProvider.get().dhtPeer
+						FutureDiscover futureDiscover = dhtPeer.peer
 							.discover()
 							.setPeerAddress(
 								futureBootstrap

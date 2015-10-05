@@ -1,6 +1,7 @@
 package thesignal.repository;
 
 import net.tomp2p.peers.Number160;
+import thesignal.entity.DHTPeer;
 import thesignal.entity.TSPeer;
 import thesignal.manager.PeerHashManager;
 
@@ -14,19 +15,19 @@ public class PeerHashRepository {
 	private PeerHashManager peerHashManager;
 	
 	@Inject
-	public PeerHashRepository(PeerHashManager writer_) {
-		peerHashManager = writer_;
+	public PeerHashRepository(PeerHashManager peerHashManager) {
+		this.peerHashManager = peerHashManager;
 	}
 
-	public Number160 getHash(TSPeer peer)
+	public Number160 getHash(DHTPeer peer)
 	{
 		Number160 hash = peerHashManager.getHash(peer);
 		
 		// WARNING: DEBUG CODE. Do not ship!!
 		if(hash == null)
 		{
-			hash = Number160.createHash(peer.name);
-			peerHashManager.putHash(peer, hash);
+			hash = peer.hash;
+			peerHashManager.put(peer, hash);
 		}
 		// END DEBUG CODE
 		

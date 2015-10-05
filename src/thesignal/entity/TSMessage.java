@@ -2,7 +2,7 @@ package thesignal.entity;
 
 import java.util.Date;
 
-public class TSMessage implements Comparable<TSMessage> {
+public class TSMessage {
 	private String payload;
 	private TSPeer sender;
 	private Date timestamp;
@@ -28,22 +28,7 @@ public class TSMessage implements Comparable<TSMessage> {
 		return timestamp;
 	}
 
-	@Override
-	public int compareTo(TSMessage o) {
-		int tcomp = timestamp.compareTo(o.timestamp);
-		if(tcomp == 0)
-		{
-			int scomp = sender.compareTo(o.sender);
-			if(scomp == 0)
-			{
-				return payload.compareTo(o.payload);
-			}
-			return scomp;
-		}
-		return tcomp;
-	}
-	
 	public TSGroup getReceiver() {
 		return recipient;
-}
+	}
 }
