@@ -1,4 +1,4 @@
-package thesignal.service;
+package thesignal.manager;
 
 import java.util.HashMap;
 

@@ -1,13 +1,23 @@
 package thesignal.repository;
 
-import java.util.HashMap;
+import java.util.List;
 
-import thesignal.entity.TSGroup;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+import thesignal.entity.DHTGroup;
+import thesignal.manager.GroupManager;
+
+@Singleton
 public class GroupRepository {
-	private HashMap<String, TSGroup> myGroups;
+	GroupManager groupManager;
+	
+	@Inject
+	public GroupRepository(GroupManager groupManager) {
+		this.groupManager = groupManager;
+	}
 
-	public HashMap<String, TSGroup> findAll() {
-		return myGroups;
+	public List<DHTGroup> findAll() {
+		return groupManager.findAll();
 	}
 }
