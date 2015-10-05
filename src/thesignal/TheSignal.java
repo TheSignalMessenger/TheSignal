@@ -2,10 +2,8 @@ package thesignal;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Array;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Random;
@@ -21,19 +19,10 @@ import javax.swing.ListSelectionModel;
 
 import net.tomp2p.peers.Number160;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 import thesignal.bus.events.MessageReceived;
-import thesignal.bus.Bus;
-import thesignal.bus.RegisterException;
-import thesignal.bus.commands.AcknowledgeMessage;
-import thesignal.entity.DHTMessage;
 import thesignal.entity.TSDHTToUILink;
 import thesignal.entity.TSGroup;
 import thesignal.entity.TSPeer;
-import thesignal.dht.ContentKeyFactory;
-import thesignal.dht.usecase.SendMessageToDHT;
 import thesignal.entity.TSMessage;
 import thesignal.ui.TSBaseList;
 import thesignal.ui.TSMessageCellRenderer;
@@ -56,8 +45,6 @@ public class TheSignal extends JFrame {
 	private TSDHTToUILink link;
 
 	private class MessageSendListener implements ActionListener {
-		Bus bus = new Bus();
-
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String text = mMessageInput.getText().trim();
