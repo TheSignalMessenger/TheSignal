@@ -38,7 +38,7 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 		try {
 			FutureDHT storeOperation = store(
 				command.message.getReceiver().peerHash,
-				peerRepository.findOne(command.message.getSender()).hash,
+				peerRepository.findOne(command.message.getSender()),
 				contentKeyFactory.create(),
 				command.message.getPayload());
 			if (!storeOperation.isSuccess()) {
