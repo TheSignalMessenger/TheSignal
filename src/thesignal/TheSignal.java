@@ -2,76 +2,36 @@ package thesignal;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Random;
-
-import javax.swing.DefaultListModel;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-
-import net.tomp2p.peers.Number160;
-
-import thesignal.bus.events.MessageReceived;
-import thesignal.entity.TSDHTToUILink;
-import thesignal.entity.TSGroup;
-import thesignal.entity.TSPeer;
-import thesignal.entity.TSMessage;
-import thesignal.ui.TSBaseList;
-import thesignal.ui.TSMessageCellRenderer;
-import thesignal.ui.TSMessageListModel;
-
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+
+import net.tomp2p.peers.Number160;
+import thesignal.bus.Bus;
+import thesignal.ui.TSGroupUI;
+import thesignal.ui.TSMessagesUI;
+import thesignal.ui.TSTextInputUI;
+
 public class TheSignal extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2995079921468810238L;
+
 	// assumes the current class is called logger
 	private final static Logger logger = Logger.getLogger("thesignal");
 
-	private JTextField mMessageInput;
-	private TSMessageListModel messagesListModel;
-	private DefaultListModel groupsListModel;
-	private JList messagesList;
-	private JList groupsList;
+	private TSGroupUI groupsUI;
+	private TSMessagesUI messagesUI;
+	private TSTextInputUI messageInputUI;
 
-	private TSDHTToUILink link;
-
-	private class MessageSendListener implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			String text = mMessageInput.getText().trim();
-			if (!text.isEmpty()) {
-				// Just for testing create a dummy event and let it get
-				// handled...
-				MessageReceived dummyEvent = new MessageReceived();
-				Date date = new Date();
-				TSPeer sender = new TSPeer("Todo");
-				TSGroup receiver = new TSGroup("Todo", Arrays.asList(sender));
-				int secondDiff = new Random(date.getTime()).nextInt(121) - 60;
-				dummyEvent.message = new TSMessage(date.toString()
-						+ (secondDiff < 0 ? " - " : " + ")
-						+ Math.abs(secondDiff) + ": " + text, sender, receiver,
-						new Date(date.getTime() + secondDiff * 1000));
-				messagesListModel.handleEvent(dummyEvent);
-				// Testing done...
-
-				messagesList.ensureIndexIsVisible(messagesList
-					.getModel()
-					.getSize() - 1);
-			}
-
-			mMessageInput.setText(null);
-			mMessageInput.requestFocusInWindow();
-		}
-	}
+	private Bus bus;
 
 	public TheSignal(String ownName, Number160 ownHash) {
 		logger.setLevel(Level.CONFIG);
@@ -82,6 +42,9 @@ public class TheSignal extends JFrame {
 		setTitle("TheSignal Messenger");
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+
+		bus = new Bus();
 
 		JComponent newContentPane = new JPanel(new BorderLayout());
 
@@ -96,39 +59,22 @@ public class TheSignal extends JFrame {
 		setContentPane(newContentPane);
 
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
-
-		link = new TSDHTToUILink();
 	}
 
 	private JTextField initializeTextInput() {
-		mMessageInput = new JTextField();
-		mMessageInput.addActionListener(new MessageSendListener());
+		messageInputUI = new TSTextInputUI(bus);
 
-		return mMessageInput;
+		return messageInputUI.getTextInputField();
 	}
 
 	private JScrollPane initializeMessagesList() {
-		messagesListModel = new TSMessageListModel();
-		messagesList = new TSBaseList(messagesListModel);
-		JScrollPane listScrollPane = new JScrollPane(messagesList);
-		messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		messagesList.setVisibleRowCount(5);
-
-		messagesList.setCellRenderer(new TSMessageCellRenderer());
-
-		return listScrollPane;
+		messagesUI = new TSMessagesUI(bus);
+		return messagesUI.getMessagesScrollPane();
 	}
 
 	private JScrollPane initializeGroupsList() {
-		groupsListModel = new DefaultListModel();
-		groupsList = new TSBaseList(groupsListModel);
-		JScrollPane groupsScrollPane = new JScrollPane(groupsList);
-		groupsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		groupsList.setVisibleRowCount(5);
-
-		groupsList.setCellRenderer(new TSMessageCellRenderer());
-
-		return groupsScrollPane;
+		groupsUI = new TSGroupUI(bus);
+		return groupsUI.getGroupsScrollPane();
 	}
 
 	public static void main(final String[] args) {

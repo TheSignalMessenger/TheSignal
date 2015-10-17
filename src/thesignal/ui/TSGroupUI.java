@@ -4,12 +4,20 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
-public class TSGroupUI {
+import thesignal.bus.Bus;
+import thesignal.bus.Event;
+import thesignal.bus.EventListener;
+import thesignal.bus.RegisterException;
+import thesignal.bus.events.GotMessages;
+import thesignal.bus.events.GroupAdded;
+import thesignal.bus.events.GroupOrderChanged;
+
+public class TSGroupUI implements EventListener<Event> {
 	private TSGroupsListModel groupsListModel;
 	private JList groupsList;
-	JScrollPane groupsScrollPane;
+	private JScrollPane groupsScrollPane;
 
-	public TSGroupUI() {
+	public TSGroupUI(Bus bus) {
 		groupsListModel = new TSGroupsListModel();
 		groupsList = new TSBaseList(groupsListModel);
 		groupsScrollPane = new JScrollPane(groupsList);
@@ -17,10 +25,25 @@ public class TSGroupUI {
 		groupsList.setVisibleRowCount(5);
 
 		groupsList.setCellRenderer(new TSMessageCellRenderer());
+		
+		try {
+			bus.register(this, GroupAdded.class.getName());
+			bus.register(this, GroupOrderChanged.class.getName());
+			bus.register(this, GroupAdded.class.getName());
+		} catch (RegisterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public JScrollPane getGroupsScrollPane()
 	{
 		return groupsScrollPane;
+	}
+
+	@Override
+	public void handle(Event event, Bus bus) {
+		// TODO Auto-generated method stub
+		
 	}
 }
