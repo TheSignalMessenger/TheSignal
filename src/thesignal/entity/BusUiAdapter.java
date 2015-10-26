@@ -2,33 +2,25 @@ package thesignal.entity;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.logging.Logger;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.google.inject.Inject;
 
-import thesignal.TestCommand;
-import thesignal.TestEvent;
-import thesignal.TestHandler;
-import thesignal.TestListener;
+import thesignal.TSBus;
 import thesignal.bus.Bus;
-import thesignal.bus.Command;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
 import thesignal.bus.RegisterException;
 import thesignal.bus.UnregisterException;
-import thesignal.bus.commands.AcknowledgeMessage;
 import thesignal.bus.events.GotMessages;
 import thesignal.bus.events.MessageAcknowledged;
 import thesignal.bus.events.MessageReceived;
 import thesignal.bus.events.MessageSent;
-import thesignal.dht.usecase.SendMessageToDHT;
 
 public class BusUiAdapter implements EventListener<Event> {
 	private final static Logger logger = Logger.getLogger("BusUiAdapter");
 
-	private Bus bus = new Bus();
+	private final Bus bus;
 	
 	/*
 	 * Map which stores a HashSet of registered EventListeners for a given eventName. If no listener is registered for a given eventName (anymore) the
@@ -36,26 +28,11 @@ public class BusUiAdapter implements EventListener<Event> {
 	 */
 	private HashMap<String, HashSet<EventListener<Event>>> eventListeners = new HashMap<String, HashSet<EventListener<Event>>>();
 	
-	public BusUiAdapter()
+	@Inject
+	public BusUiAdapter(TSBus bus_)
 	{
-		Injector injector = Guice.createInjector();
-
-		SendMessageToDHT sendMessageToDHT = injector
-			.getInstance(SendMessageToDHT.class);
+		bus = bus_;
 		try {
-			bus.register(sendMessageToDHT, SendMessageToDHT.class.getName());
-			
-			// TestCode...
-			TestHandler testHandler = new TestHandler();
-			TestListener testListener = new TestListener();
-			bus.register(testHandler, TestCommand.class.getName());
-			bus.register(testListener, TestEvent.class.getName());
-			bus.handle(new AcknowledgeMessage());
-			bus.handle(new TestCommand());
-			bus.raise(new TestEvent());
-			bus.register(testListener, TestEvent.class.getName());
-			// TestCode end.
-		
 			bus.register(this, GotMessages.class.getName());
 			bus.register(this, MessageReceived.class.getName());
 			bus.register(this, MessageAcknowledged.class.getName());
@@ -65,6 +42,11 @@ public class BusUiAdapter implements EventListener<Event> {
 			logger.severe(e.getMessage());
 		}
 		
+	}
+	
+	public Bus getBus()
+	{
+		return bus;
 	}
 
 	public void register(EventListener<?> eventListener, String eventName) {
@@ -124,9 +106,5 @@ public class BusUiAdapter implements EventListener<Event> {
 		{
 			listener.handle(event, bus);
 		}
-	}
-
-	public void handle(Command command) {
-		bus.handle(command);
 	}
 }
