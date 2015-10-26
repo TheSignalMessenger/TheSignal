@@ -29,7 +29,7 @@ public class TSGroupUI implements EventListener<Event> {
 		try {
 			bus.register(this, GroupAdded.class.getName());
 			bus.register(this, GroupOrderChanged.class.getName());
-			bus.register(this, GroupAdded.class.getName());
+			bus.register(this, GotMessages.class.getName());
 		} catch (RegisterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
