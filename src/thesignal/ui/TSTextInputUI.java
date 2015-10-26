@@ -59,14 +59,6 @@ public class TSTextInputUI implements EventListener<Event> {
 		
 		mMessageInput = new JTextField();
 		mMessageInput.addActionListener(new MessageSendListener());
-		
-		try {
-			bus.register(this, Connected.class.getName());
-		} catch (RegisterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 	}
 	
 	public JTextField getTextInputField()

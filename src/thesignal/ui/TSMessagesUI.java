@@ -27,17 +27,6 @@ public class TSMessagesUI implements EventListener<Event> {
 		messagesList.setVisibleRowCount(5);
 
 		messagesList.setCellRenderer(new TSMessageCellRenderer());
-
-		try {
-			bus.register(this, GotMessages.class.getName());
-			bus.register(this, MessageAcknowledged.class.getName());
-			bus.register(this, MessageReceived.class.getName());
-			bus.register(this, MessageSent.class.getName());
-			bus.register(this, SendingMessageFailed.class.getName());
-		} catch (RegisterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	public JScrollPane getMessagesScrollPane()
