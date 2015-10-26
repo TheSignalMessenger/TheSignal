@@ -3,7 +3,6 @@ package thesignal.dht.usecase;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Random;
 
 import net.tomp2p.futures.FutureBootstrap;
 import net.tomp2p.futures.FutureDiscover;
@@ -11,9 +10,7 @@ import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerMaker;
 import net.tomp2p.peers.Number160;
 
-import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import thesignal.bus.Bus;
 import thesignal.bus.EventListener;
@@ -22,7 +19,6 @@ import thesignal.bus.events.Started;
 import thesignal.entity.DHTPeer;
 import thesignal.manager.MeManager;
 import thesignal.manager.PeerHashManager;
-import thesignal.repository.MeRepository;
 
 public class ConnectToDHT implements EventListener<Started> {
 	MeManager meManager;
@@ -34,9 +30,10 @@ public class ConnectToDHT implements EventListener<Started> {
 	public ConnectToDHT(MeManager meManager, PeerHashManager peerHashManager) {
 		this.peerHashManager = peerHashManager;
 		this.meManager = meManager;
+		
+		// TODO read the following info from somewhere else
 		this.bootstrapHost = "tsp.no-ip.org";
 		// or "user.nullteilerfrei.de"
-
 		this.port = 4242;
 	}
 
@@ -53,12 +50,8 @@ public class ConnectToDHT implements EventListener<Started> {
 				try {
 					// TODO get/generate the Hash the correct way...
 					Number160 hash = Number160.createHash("foobar");
-
-					// TODO fix port
 					Peer peer = new PeerMaker(hash)
-						.setPorts(
-							4000 + Math.round(new Random(System
-								.currentTimeMillis()).nextFloat() * 200.f))
+						.setPorts(port)
 						.makeAndListen();
 
 					dhtPeer = new DHTPeer(hash, peer);
