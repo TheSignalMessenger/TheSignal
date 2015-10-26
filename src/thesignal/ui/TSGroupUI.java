@@ -17,7 +17,7 @@ public class TSGroupUI implements EventListener<Event> {
 	private JList groupsList;
 	private JScrollPane groupsScrollPane;
 
-	public TSGroupUI(Bus bus) {
+	public TSGroupUI() {
 		groupsListModel = new TSGroupsListModel();
 		groupsList = new TSBaseList(groupsListModel);
 		groupsScrollPane = new JScrollPane(groupsList);

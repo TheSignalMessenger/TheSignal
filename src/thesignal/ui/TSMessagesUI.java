@@ -3,6 +3,9 @@ package thesignal.ui;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
+import com.google.inject.Inject;
+
+import thesignal.TSBus;
 import thesignal.bus.Bus;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
@@ -18,8 +21,12 @@ public class TSMessagesUI implements EventListener<Event> {
 	private TSMessageListModel messagesListModel;
 	private TSBaseList messagesList;
 	private JScrollPane messagesScrollPane;
-
-	public TSMessagesUI(Bus bus) {
+	
+	private TSBus bus;
+	
+	@Inject
+	public TSMessagesUI(TSBus bus_) {
+		bus = bus_;
 		messagesListModel = new TSMessageListModel();
 		messagesList = new TSBaseList(messagesListModel);
 		messagesScrollPane = new JScrollPane(messagesList);

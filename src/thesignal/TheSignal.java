@@ -20,10 +20,13 @@ import thesignal.bus.events.Started;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import thesignal.dht.usecase.ConnectToDHT;
+import thesignal.dht.usecase.ReadGroupsFromDHT;
+import thesignal.dht.usecase.SendMessageToDHT;
+import thesignal.dht.usecase.SetupMessageReceiving;
 import thesignal.entity.BusUiAdapter;
 import thesignal.entity.TSPeer;
 import thesignal.repository.PeerRepository;
-
 import thesignal.ui.TSGroupUI;
 import thesignal.ui.TSMessagesUI;
 import thesignal.ui.TSTextInputUI;
@@ -41,7 +44,8 @@ public class TheSignal extends JFrame {
 	private TSMessagesUI messagesUI;
 	private TSTextInputUI messageInputUI;
 
-	private BusUiAdapter busUIAdapter;
+	private TSBus tsBus;
+	private Injector injector;
 
 	public TheSignal(String ownName) {
 		logger.setLevel(Level.CONFIG);
@@ -50,9 +54,18 @@ public class TheSignal extends JFrame {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-		Injector injector = Guice.createInjector();
+		injector = Guice.createInjector();
 
-		busUIAdapter = injector.getInstance(BusUiAdapter.class);
+		tsBus = injector.getInstance(TSBus.class);
+		tsBus.setup(
+			injector.getInstance(ConnectToDHT.class),
+			injector.getInstance(SendMessageToDHT.class),
+			injector.getInstance(ReadGroupsFromDHT.class),
+			injector.getInstance(SetupMessageReceiving.class),
+			injector.getInstance(BusUiAdapter.class),
+			injector.getInstance(TSMessagesUI.class),
+			injector.getInstance(TSGroupUI.class),
+			injector.getInstance(TSTextInputUI.class));
 
 		// TODO move the following lines to a use case
 		JComponent newContentPane = new JPanel(new BorderLayout());
@@ -70,35 +83,36 @@ public class TheSignal extends JFrame {
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
 
 		// DEBUG_CODE!
-		PeerRepository peerRepository = injector.getInstance(PeerRepository.class);
+		PeerRepository peerRepository = injector
+			.getInstance(PeerRepository.class);
 		String[] names = { "mehrtuerer", "born" };
-		for(String name : names)
-		{
+		for (String name : names) {
 			try {
-				peerRepository.addPeerHash(new TSPeer(name), Number160.createHash(name));
+				peerRepository.addPeerHash(
+					new TSPeer(name),
+					Number160.createHash(name));
 			} catch (OperationNotSupportedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		// END DEBUG_CODE!
-		
-		busUIAdapter.getBus().raise(new Started());
+
+		tsBus.raise(new Started());
 	}
 
 	private JTextField initializeTextInput() {
-		messageInputUI = new TSTextInputUI(busUIAdapter.getBus());
-
+		messageInputUI = injector.getInstance(TSTextInputUI.class);
 		return messageInputUI.getTextInputField();
 	}
 
 	private JScrollPane initializeMessagesList() {
-		messagesUI = new TSMessagesUI(busUIAdapter.getBus());
+		messagesUI = injector.getInstance(TSMessagesUI.class);
 		return messagesUI.getMessagesScrollPane();
 	}
 
 	private JScrollPane initializeGroupsList() {
-		groupsUI = new TSGroupUI(busUIAdapter.getBus());
+		groupsUI = injector.getInstance(TSGroupUI.class);
 		return groupsUI.getGroupsScrollPane();
 	}
 

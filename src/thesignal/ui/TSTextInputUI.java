@@ -8,6 +8,9 @@ import java.util.Random;
 
 import javax.swing.JTextField;
 
+import com.google.inject.Inject;
+
+import thesignal.TSBus;
 import thesignal.bus.Bus;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
@@ -24,6 +27,14 @@ public class TSTextInputUI implements EventListener<Event> {
 	private JTextField mMessageInput;
 	private Bus bus;
 
+	@Inject
+	public TSTextInputUI(TSBus bus_) {
+		bus = bus_;
+		
+		mMessageInput = new JTextField();
+		mMessageInput.addActionListener(new MessageSendListener());
+	}
+	
 	private class MessageSendListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -52,13 +63,6 @@ public class TSTextInputUI implements EventListener<Event> {
 			mMessageInput.setText(null);
 			mMessageInput.requestFocusInWindow();
 		}
-	}
-
-	public TSTextInputUI(Bus bus_) {
-		bus = bus_;
-		
-		mMessageInput = new JTextField();
-		mMessageInput.addActionListener(new MessageSendListener());
 	}
 	
 	public JTextField getTextInputField()
