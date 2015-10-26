@@ -15,14 +15,6 @@ public class DHTPeer implements Comparable<DHTPeer> {
 	@Override
 	public int compareTo(DHTPeer o) {
 		int hcomp = hash.compareTo(o.hash);
-		if (hcomp == 0) {
-			int ncomp = o.hash.compareTo(hash);
-			if (ncomp != 0) {
-				// sha1 collision
-				assert (false);
-			}
-			return ncomp;
-		}
 		return hcomp;
 	}
 }
