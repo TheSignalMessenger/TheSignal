@@ -50,8 +50,9 @@ public class Bus {
 	 * @param commandHandler
 	 * @throws RegisterException
 	 */
-	public void register(CommandHandler<?> commandHandler, String commandName)
+	public void register(CommandHandler<?> commandHandler, Class<?> commandClass)
 			throws RegisterException {
+		String commandName = commandClass.getName();
 		if (commandHandler == null) {
 			throw new RegisterException(
 					"Trying to register a null commandHandler!");
@@ -93,9 +94,9 @@ public class Bus {
 	 * @param eventListener
 	 * @throws RegisterException
 	 */
-	public void register(EventListener<?> eventListener, String eventName)
+	public void register(EventListener<?> eventListener, Class<?> eventClass)
 			throws RegisterException {
-
+		String eventName = eventClass.getName();
 		if (eventListener == null) {
 			throw new RegisterException(
 					"Trying to register a null eventListener!");
