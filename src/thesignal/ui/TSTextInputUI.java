@@ -12,6 +12,7 @@ import thesignal.bus.Bus;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
 import thesignal.bus.RegisterException;
+import thesignal.bus.commands.SendMessage;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.MessageReceived;
 import thesignal.entity.TSGroup;
@@ -21,23 +22,26 @@ import thesignal.entity.TSPeer;
 public class TSTextInputUI implements EventListener<Event> {
 
 	private JTextField mMessageInput;
+	private Bus bus;
 
 	private class MessageSendListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String text = mMessageInput.getText().trim();
 			if (!text.isEmpty()) {
-				// Just for testing create a dummy event and let it get
-				// handled...
-				MessageReceived dummyEvent = new MessageReceived();
 				Date date = new Date();
 				TSPeer sender = new TSPeer("Todo");
 				TSGroup receiver = new TSGroup("Todo", Arrays.asList(sender));
 				int secondDiff = new Random(date.getTime()).nextInt(121) - 60;
-				dummyEvent.message = new TSMessage(date.toString()
+				TSMessage message = new TSMessage(date.toString()
 						+ (secondDiff < 0 ? " - " : " + ")
 						+ Math.abs(secondDiff) + ": " + text, sender, receiver,
 						new Date(date.getTime() + secondDiff * 1000));
+
+				SendMessage command =  new SendMessage(message);
+				
+				bus.handle(command);
+
 //				messagesListModel.handleEvent(dummyEvent);
 
 //				messagesList.ensureIndexIsVisible(messagesList
@@ -50,7 +54,9 @@ public class TSTextInputUI implements EventListener<Event> {
 		}
 	}
 
-	public TSTextInputUI(Bus bus) {
+	public TSTextInputUI(Bus bus_) {
+		bus = bus_;
+		
 		mMessageInput = new JTextField();
 		mMessageInput.addActionListener(new MessageSendListener());
 		
