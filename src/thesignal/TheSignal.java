@@ -6,6 +6,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.naming.OperationNotSupportedException;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -13,9 +14,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import net.tomp2p.peers.Number160;
-import thesignal.bus.Bus;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.Started;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+import thesignal.entity.BusUiAdapter;
+import thesignal.entity.TSPeer;
+import thesignal.repository.PeerRepository;
+
 import thesignal.ui.TSGroupUI;
 import thesignal.ui.TSMessagesUI;
 import thesignal.ui.TSTextInputUI;
@@ -33,7 +41,7 @@ public class TheSignal extends JFrame {
 	private TSMessagesUI messagesUI;
 	private TSTextInputUI messageInputUI;
 
-	private Bus bus;
+	private BusUiAdapter busUIAdapter;
 
 	public TheSignal(String ownName) {
 		logger.setLevel(Level.CONFIG);
@@ -42,7 +50,9 @@ public class TheSignal extends JFrame {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-		bus = new Bus(); // TODO instanciate TSBus instead
+		Injector injector = Guice.createInjector();
+
+		busUIAdapter = injector.getInstance(BusUiAdapter.class);
 
 		// TODO move the following lines to a use case
 		JComponent newContentPane = new JPanel(new BorderLayout());
@@ -59,22 +69,36 @@ public class TheSignal extends JFrame {
 
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
 
-		bus.raise(new Started());
+		// DEBUG_CODE!
+		PeerRepository peerRepository = injector.getInstance(PeerRepository.class);
+		String[] names = { "mehrtuerer", "born" };
+		for(String name : names)
+		{
+			try {
+				peerRepository.addPeerHash(new TSPeer(name), Number160.createHash(name));
+			} catch (OperationNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		// END DEBUG_CODE!
+		
+		busUIAdapter.getBus().raise(new Started());
 	}
 
 	private JTextField initializeTextInput() {
-		messageInputUI = new TSTextInputUI(bus);
+		messageInputUI = new TSTextInputUI(busUIAdapter.getBus());
 
 		return messageInputUI.getTextInputField();
 	}
 
 	private JScrollPane initializeMessagesList() {
-		messagesUI = new TSMessagesUI(bus);
+		messagesUI = new TSMessagesUI(busUIAdapter.getBus());
 		return messagesUI.getMessagesScrollPane();
 	}
 
 	private JScrollPane initializeGroupsList() {
-		groupsUI = new TSGroupUI(bus);
+		groupsUI = new TSGroupUI(busUIAdapter.getBus());
 		return groupsUI.getGroupsScrollPane();
 	}
 
