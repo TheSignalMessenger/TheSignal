@@ -14,6 +14,8 @@ import javax.swing.JTextField;
 
 import net.tomp2p.peers.Number160;
 import thesignal.bus.Bus;
+import thesignal.bus.events.Connected;
+import thesignal.bus.events.Started;
 import thesignal.ui.TSGroupUI;
 import thesignal.ui.TSMessagesUI;
 import thesignal.ui.TSTextInputUI;
@@ -33,19 +35,16 @@ public class TheSignal extends JFrame {
 
 	private Bus bus;
 
-	public TheSignal(String ownName, Number160 ownHash) {
+	public TheSignal(String ownName) {
 		logger.setLevel(Level.CONFIG);
-		ConsoleHandler consoleHandler = new ConsoleHandler();
-		consoleHandler.setLevel(Level.ALL);
-		logger.addHandler(consoleHandler);
 
 		setTitle("TheSignal Messenger");
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
+		bus = new Bus(); // TODO instanciate TSBus instead
 
-		bus = new Bus();
-
+		// TODO move the following lines to a use case
 		JComponent newContentPane = new JPanel(new BorderLayout());
 
 		JTextField messageInputField = initializeTextInput();
@@ -59,6 +58,8 @@ public class TheSignal extends JFrame {
 		setContentPane(newContentPane);
 
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+
+		bus.raise(new Started());
 	}
 
 	private JTextField initializeTextInput() {
@@ -81,8 +82,7 @@ public class TheSignal extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				TheSignal ex = new TheSignal(args[0], Number160
-					.createHash(args[0]));
+				TheSignal ex = new TheSignal(args[0]);
 				ex.setVisible(true);
 			}
 		});
