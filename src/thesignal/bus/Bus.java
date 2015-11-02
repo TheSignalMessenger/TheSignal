@@ -73,8 +73,9 @@ public class Bus {
 	 * @param commandName
 	 * @throws UnregisterException
 	 */
-	public void unregister(CommandHandler<?> commandHandler, String commandName)
+	public void unregister(CommandHandler<?> commandHandler, Class<?> commandClass)
 			throws UnregisterException {
+		String commandName = commandClass.getName();
 		if (commandHandler == null) {
 			throw new UnregisterException(
 					"Trying to unregister a null commandHandler!");
@@ -119,8 +120,9 @@ public class Bus {
 	 * @param eventName
 	 * @throws UnregisterException
 	 */
-	public void unregister(EventListener<?> eventListener, String eventName)
+	public void unregister(EventListener<?> eventListener, Class<?> eventClass)
 			throws UnregisterException {
+		String eventName = eventClass.getName();
 		if (eventListener == null) {
 			throw new UnregisterException(
 					"Trying to unregister a null eventListener!");
