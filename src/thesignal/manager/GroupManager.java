@@ -1,27 +1,41 @@
 package thesignal.manager;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import net.tomp2p.peers.Number160;
 
 import com.google.inject.Singleton;
 
-import thesignal.entity.DHTGroup;
+import thesignal.entity.TSGroup;
+import thesignal.entity.TSMessage;
+import thesignal.entity.TSPeer;
 
 @Singleton
 public class GroupManager {
-	private List<DHTGroup> groups;
+	private ArrayList<TSGroup> groups;
 
-	public List<DHTGroup> findAll() {
+	public List<TSGroup> findAll() {
 		return groups;
 	}
-
-	public void add(DHTGroup group) {
+	
+	public TSGroup addGroup(String name_, Collection<TSUser> members_, Collection<TSMessage> messages_) {
+		TSGroup group = new TSGroup(groups.size(), name_, members_, message_);
 		groups.add(group);
+		return group;
+	}
+	
+	public TSGroup getGroup(int index)
+	{
+		if(groups.size() > index)
+		{
+			return groups.get(index);
+		}
+		else
+		{
+			return null;
+		}
 	}
 
-	public void add(String _name, Number160 _hash) {
-		DHTGroup dhtGroup = new DHTGroup(groups.size(), _name, _hash);
-		add(dhtGroup);
-	}
 }

@@ -8,13 +8,15 @@ import javax.naming.OperationNotSupportedException;
 import net.tomp2p.peers.Number160;
 
 public class TSGroup {
+	private Integer index;
 	private String name;
 	private TreeSet<TSUser> members = new TreeSet<TSUser>();
 	private TreeSet<TSMessage> messages = new TreeSet<TSMessage>();
 
 	private boolean immutable;
 	
-	public TSGroup(String name_, Collection<TSUser> members_, Collection<TSMessage> messages_) {
+	public TSGroup(int index_, String name_, Collection<TSUser> members_, Collection<TSMessage> messages_) {
+		index = index_;
 		name = name_;
 		members.addAll(members_);
 		messages.addAll(messages_);
