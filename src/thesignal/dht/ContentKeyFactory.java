@@ -3,7 +3,7 @@ package thesignal.dht;
 import com.google.inject.Singleton;
 
 import net.tomp2p.peers.Number160;
-import thesignal.entity.TSPeer;
+import thesignal.entity.TSUser;
 import thesignal.utils.Util;
 
 @Singleton

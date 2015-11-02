@@ -25,7 +25,7 @@ import thesignal.dht.usecase.ReadGroupsFromDHT;
 import thesignal.dht.usecase.SendMessageToDHT;
 import thesignal.dht.usecase.SetupMessageReceiving;
 import thesignal.entity.BusUiAdapter;
-import thesignal.entity.TSPeer;
+import thesignal.entity.TSUser;
 import thesignal.repository.PeerRepository;
 import thesignal.ui.TSGroupUI;
 import thesignal.ui.TSMessagesUI;
@@ -89,7 +89,7 @@ public class TheSignal extends JFrame {
 		for (String name : names) {
 			try {
 				peerRepository.addPeerHash(
-					new TSPeer(name),
+					new TSUser(name),
 					Number160.createHash(name));
 			} catch (OperationNotSupportedException e) {
 				// TODO Auto-generated catch block

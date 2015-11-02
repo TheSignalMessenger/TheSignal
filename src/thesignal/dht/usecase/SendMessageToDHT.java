@@ -60,7 +60,7 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 		DHTMessage msg = new DHTMessage();
 		msg.createdDateTime = new Date().getTime();
 		msg.payload = value;
-		return meProvider.getDHTPeer().peer
+		return meProvider.getDHTUser().peer
 			.put(location)
 			.setData(contentKey, new Data(msg))
 			.setDomainKey(domain)

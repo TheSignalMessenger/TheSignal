@@ -1,7 +1,7 @@
 package thesignal.repository;
 
-import thesignal.entity.DHTPeer;
-import thesignal.entity.TSPeer;
+import thesignal.entity.DHTUser;
+import thesignal.entity.TSUser;
 import thesignal.manager.MeManager;
 
 import com.google.inject.Inject;
@@ -17,11 +17,11 @@ public class MeRepository {
 		this.meManager = meManager;
 	}
 	
-	public TSPeer getTSPeer() {
-		return meManager.getTSPeer();
+	public TSUser getTSUser() {
+		return meManager.getTSUser();
 	}
 	
-	public DHTPeer getDHTPeer() {
-		return meManager.getDHTPeer();
+	public DHTUser getDHTUser() {
+		return meManager.getDHTUser();
 	}
 }

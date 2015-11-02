@@ -12,7 +12,7 @@ import thesignal.bus.events.MessageReceived;
 import thesignal.entity.DHTMessage;
 import thesignal.entity.TSGroup;
 import thesignal.entity.TSMessage;
-import thesignal.entity.TSPeer;
+import thesignal.entity.TSUser;
 
 @Singleton
 public class MessageReceivedFactory {
@@ -61,10 +61,10 @@ public class MessageReceivedFactory {
 		return new Date(createdMS);
 	}
 
-	private TSPeer getSender(Data data) {
+	private TSUser getSender(Data data) {
 		try {
 			DHTMessage msg = (DHTMessage) data.getObject();
-			return new TSPeer(msg.senderName);
+			return new TSUser(msg.senderName);
 		} catch (ClassNotFoundException e) {
 			// e.printStackTrace();
 		} catch (IOException e) {

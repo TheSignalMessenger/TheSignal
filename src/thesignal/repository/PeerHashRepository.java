@@ -1,8 +1,8 @@
 package thesignal.repository;
 
 import net.tomp2p.peers.Number160;
-import thesignal.entity.DHTPeer;
-import thesignal.entity.TSPeer;
+import thesignal.entity.DHTEntity;
+import thesignal.entity.TSUser;
 import thesignal.manager.PeerHashManager;
 
 import com.google.inject.Guice;
@@ -19,7 +19,7 @@ public class PeerHashRepository {
 		this.peerHashManager = peerHashManager;
 	}
 
-	public Number160 getHash(DHTPeer peer)
+	public Number160 getHash(DHTEntity peer)
 	{
 		Number160 hash = peerHashManager.getHash(peer);
 		

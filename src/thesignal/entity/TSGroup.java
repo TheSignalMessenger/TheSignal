@@ -9,12 +9,12 @@ import net.tomp2p.peers.Number160;
 
 public class TSGroup {
 	private String name;
-	private TreeSet<TSPeer> members = new TreeSet<TSPeer>();
+	private TreeSet<TSUser> members = new TreeSet<TSUser>();
 	private TreeSet<TSMessage> messages = new TreeSet<TSMessage>();
 
 	private boolean immutable;
 	
-	public TSGroup(String name_, Collection<TSPeer> members_, Collection<TSMessage> messages_) {
+	public TSGroup(String name_, Collection<TSUser> members_, Collection<TSMessage> messages_) {
 		name = name_;
 		members.addAll(members_);
 		messages.addAll(messages_);
@@ -27,13 +27,13 @@ public class TSGroup {
 		messages.add(message);
 	}
 	
-	public void addMember(TSPeer peer) throws OperationNotSupportedException
+	public void addMember(TSUser peer) throws OperationNotSupportedException
 	{
 		checkMutability();
 		members.add(peer);
 	}
 	
-	public TSGroup(String name_, Collection<TSPeer> members_)
+	public TSGroup(String name_, Collection<TSUser> members_)
 	{
 		name = name_;
 		members.addAll(members_);
@@ -52,7 +52,7 @@ public class TSGroup {
 		}
 	}
 	
-	public boolean isMember(TSPeer peer)
+	public boolean isMember(TSUser peer)
 	{
 		return members.contains(peer);
 	}

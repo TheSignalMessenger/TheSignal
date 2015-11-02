@@ -16,7 +16,7 @@ import thesignal.bus.Bus;
 import thesignal.bus.EventListener;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.Started;
-import thesignal.entity.DHTPeer;
+import thesignal.entity.DHTUser;
 import thesignal.manager.MeManager;
 import thesignal.manager.PeerHashManager;
 
@@ -43,7 +43,7 @@ public class ConnectToDHT implements EventListener<Started> {
 
 			@Override
 			public void run() {
-				DHTPeer dhtPeer;
+				DHTUser dhtUser;
 
 				// TODO: Handle the cases that either tomP2PPeer or fb aren't
 				// correctly initialized (i.e. == null)...
@@ -54,9 +54,9 @@ public class ConnectToDHT implements EventListener<Started> {
 						.setPorts(port)
 						.makeAndListen();
 
-					dhtPeer = new DHTPeer(hash, peer);
-					meManager.setDHTPeer(dhtPeer);
-					peerHashManager.put(dhtPeer, hash);
+					dhtUser = new DHTUser(hash, peer);
+					meManager.setDHTUser(dhtUser);
+					peerHashManager.put(dhtUser, hash);
 				} catch (IOException e) {
 					// TODO do something smart in case of Exception
 					e.printStackTrace();
@@ -67,7 +67,7 @@ public class ConnectToDHT implements EventListener<Started> {
 				do {
 					FutureBootstrap futureBootstrap = null;
 					try {
-						futureBootstrap = dhtPeer.peer
+						futureBootstrap = dhtUser.peer
 							.bootstrap()
 							.setInetAddress(
 								InetAddress.getByName(bootstrapHost))
@@ -80,7 +80,7 @@ public class ConnectToDHT implements EventListener<Started> {
 					futureBootstrap.awaitUninterruptibly();
 					success = futureBootstrap.isSuccess();
 					if (futureBootstrap.getBootstrapTo() != null) {
-						FutureDiscover futureDiscover = dhtPeer.peer
+						FutureDiscover futureDiscover = dhtUser.peer
 							.discover()
 							.setPeerAddress(
 								futureBootstrap

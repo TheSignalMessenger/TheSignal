@@ -1,27 +1,27 @@
 package thesignal.manager;
 
-import thesignal.entity.DHTPeer;
-import thesignal.entity.TSPeer;
+import thesignal.entity.DHTUser;
+import thesignal.entity.TSUser;
 
 public class MeManager {
 
-	private TSPeer tsPeer;
-	private DHTPeer dhtPeer;
+	private TSUser tsUser;
+	private DHTUser dhtUser;
 
 	public MeManager() {
 		// @TODO inject name
-		this.tsPeer = new TSPeer("my name");
+		this.tsUser = new TSUser("my name");
 	}
 
-	public TSPeer getTSPeer() {
-		return tsPeer;
+	public TSUser getTSUser() {
+		return tsUser;
 	}
 
-	public void setDHTPeer(DHTPeer dhtPeer) {
-		this.dhtPeer = dhtPeer;
+	public void setDHTUser(DHTUser dhtUser) {
+		this.dhtUser = dhtUser;
 	}
 
-	public DHTPeer getDHTPeer() {
-		return dhtPeer;
+	public DHTUser getDHTUser() {
+		return dhtUser;
 	}
 }

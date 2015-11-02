@@ -4,11 +4,11 @@ import java.util.Date;
 
 public class TSMessage {
 	private String payload;
-	private TSPeer sender;
+	private TSUser sender;
 	private Date timestamp;
 	private TSGroup recipient;
 
-	public TSMessage(String payload, TSPeer sender, TSGroup recipient,
+	public TSMessage(String payload, TSUser sender, TSGroup recipient,
 			Date timestamp) {
 		this.payload = payload;
 		this.sender = sender;
@@ -20,7 +20,7 @@ public class TSMessage {
 		return payload;
 	}
 
-	public TSPeer getSender() {
+	public TSUser getSender() {
 		return sender;
 	}
 

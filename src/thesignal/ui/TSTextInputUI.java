@@ -20,7 +20,7 @@ import thesignal.bus.events.Connected;
 import thesignal.bus.events.MessageReceived;
 import thesignal.entity.TSGroup;
 import thesignal.entity.TSMessage;
-import thesignal.entity.TSPeer;
+import thesignal.entity.TSUser;
 
 public class TSTextInputUI implements EventListener<Event> {
 
@@ -41,7 +41,7 @@ public class TSTextInputUI implements EventListener<Event> {
 			String text = mMessageInput.getText().trim();
 			if (!text.isEmpty()) {
 				Date date = new Date();
-				TSPeer sender = new TSPeer("Todo");
+				TSUser sender = new TSUser("Todo");
 				TSGroup receiver = new TSGroup("Todo", Arrays.asList(sender));
 				int secondDiff = new Random(date.getTime()).nextInt(121) - 60;
 				TSMessage message = new TSMessage(date.toString()

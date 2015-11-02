@@ -2,12 +2,12 @@ package thesignal.repository;
 
 import java.util.HashMap;
 
-import thesignal.entity.TSPeer;
+import thesignal.entity.TSUser;
 
 public class KnownPeersRepository {
-	private HashMap<String, TSPeer> knownPeers;
+	private HashMap<String, TSUser> knownPeers;
 
-	public HashMap<String, TSPeer> findAll() {
+	public HashMap<String, TSUser> findAll() {
 		return knownPeers;
 	}
 }
