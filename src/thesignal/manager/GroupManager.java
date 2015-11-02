@@ -10,7 +10,7 @@ import com.google.inject.Singleton;
 
 import thesignal.entity.TSGroup;
 import thesignal.entity.TSMessage;
-import thesignal.entity.TSPeer;
+import thesignal.entity.TSUser;
 
 @Singleton
 public class GroupManager {
@@ -19,21 +19,18 @@ public class GroupManager {
 	public List<TSGroup> findAll() {
 		return groups;
 	}
-	
-	public TSGroup addGroup(String name_, Collection<TSUser> members_, Collection<TSMessage> messages_) {
-		TSGroup group = new TSGroup(groups.size(), name_, members_, message_);
+
+	public TSGroup addGroup(String name_, Collection<TSUser> members_,
+			Collection<TSMessage> messages_) {
+		TSGroup group = new TSGroup(groups.size(), name_, members_, messages_);
 		groups.add(group);
 		return group;
 	}
-	
-	public TSGroup getGroup(int index)
-	{
-		if(groups.size() > index)
-		{
+
+	public TSGroup getGroup(int index) {
+		if (groups.size() > index) {
 			return groups.get(index);
-		}
-		else
-		{
+		} else {
 			return null;
 		}
 	}
