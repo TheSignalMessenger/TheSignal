@@ -2,12 +2,13 @@ package thesignal;
 
 import java.util.logging.Logger;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import thesignal.bus.Bus;
+import thesignal.bus.Event;
+import thesignal.bus.EventListener;
 import thesignal.bus.RegisterException;
-import thesignal.bus.commands.AcknowledgeMessage;
+import thesignal.bus.UnregisterException;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.GotMessages;
 import thesignal.bus.events.GroupAdded;
@@ -46,18 +47,19 @@ public class TSBus extends Bus {
 			register(busUiAdapter, MessageReceived.class);
 			register(busUiAdapter, MessageAcknowledged.class);
 			register(busUiAdapter, MessageSent.class);
-
-			register(tsMessagesUI, GotMessages.class);
-			register(tsMessagesUI, MessageAcknowledged.class);
-			register(tsMessagesUI, MessageReceived.class);
-			register(tsMessagesUI, MessageSent.class);
-			register(tsMessagesUI, SendingMessageFailed.class);
-
-			register(tsGroupUI, GroupAdded.class);
-			register(tsGroupUI, GroupOrderChanged.class);
-			register(tsGroupUI, GotMessages.class);
-
-			register(tsTextInputUI, Connected.class);
+			
+			if(tsMessagesUI != null)
+			{
+				initializeMessagesUI(tsMessagesUI);
+			}
+			if(tsGroupUI != null)
+			{
+				initializeGroupsUI(tsGroupUI);
+			}
+			if(tsTextInputUI != null)
+			{
+				initializeTextInputUI(tsTextInputUI);	
+			}
 
 			// TestCode...
 			// TestHandler testHandler = new TestHandler();
@@ -70,6 +72,81 @@ public class TSBus extends Bus {
 			// register(testListener, TestEvent.class.getName());
 			// TestCode end.
 		} catch (RegisterException e) {
+			logger.severe(e.getMessage());
+		}
+	}
+	
+	public void setup(ConnectToDHT connectToDHT,
+			SendMessageToDHT sendMessageToDHT,
+			ReadGroupsFromDHT readGroupsFromDHT,
+			SetupMessageReceiving setupMessageReceiving,
+			BusUiAdapter busUiAdapter)
+	{
+		setup(connectToDHT, sendMessageToDHT, readGroupsFromDHT, setupMessageReceiving, busUiAdapter, null, null, null);
+	}
+	
+	public void initializeMessagesUI(EventListener<Event> messagesUI)
+	{
+		try {
+			register(messagesUI, GotMessages.class);
+			register(messagesUI, MessageAcknowledged.class);
+			register(messagesUI, MessageReceived.class);
+			register(messagesUI, MessageSent.class);
+			register(messagesUI, SendingMessageFailed.class);
+		} catch (RegisterException e) {
+			logger.severe(e.getMessage());
+		}
+	}
+
+	public void deinitializeMessagesUI(EventListener<Event> messagesUI)
+	{
+		try {
+			unregister(messagesUI, GotMessages.class);
+			unregister(messagesUI, MessageAcknowledged.class);
+			unregister(messagesUI, MessageReceived.class);
+			unregister(messagesUI, MessageSent.class);
+			unregister(messagesUI, SendingMessageFailed.class);
+		} catch (UnregisterException e) {
+			logger.severe(e.getMessage());
+		}
+	}
+
+	public void initializeGroupsUI(EventListener<Event> groupsUI)
+	{
+		try {
+			register(groupsUI, GroupAdded.class);
+			register(groupsUI, GroupOrderChanged.class);
+			register(groupsUI, GotMessages.class);
+		} catch (RegisterException e) {
+			logger.severe(e.getMessage());
+		}
+	}
+
+	public void deinitializeGroupsUI(EventListener<Event> groupsUI)
+	{
+		try {
+			unregister(groupsUI, GroupAdded.class);
+			unregister(groupsUI, GroupOrderChanged.class);
+			unregister(groupsUI, GotMessages.class);
+		} catch (UnregisterException e) {
+			logger.severe(e.getMessage());
+		}
+	}
+
+	public void initializeTextInputUI(EventListener<Event> textInputUI)
+	{
+		try {
+			register(textInputUI, Connected.class);
+		} catch (RegisterException e) {
+			logger.severe(e.getMessage());
+		}
+	}
+
+	public void deinitializeTextInputUI(EventListener<Event> textInputUI)
+	{
+		try {
+			unregister(textInputUI, Connected.class);
+		} catch (UnregisterException e) {
 			logger.severe(e.getMessage());
 		}
 	}
