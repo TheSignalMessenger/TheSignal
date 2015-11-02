@@ -1,10 +1,33 @@
 package thesignal.entity;
 
-import net.tomp2p.p2p.Peer;
+import java.util.List;
+
 import net.tomp2p.peers.Number160;
 
 public class DHTGroup extends DHTPeer {
-	public DHTGroup(Number160 hash, Peer peer) {
-		super(hash, peer);
+	private Integer index;
+	private String name;
+	private List<DHTPeer> members;
+
+	public DHTGroup(Integer _index, String _name, Number160 _hash) {
+		super(_hash);
+		index = _index;
+		name = _name;
+	}
+
+	public Integer getIndex() {
+		return index;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public List<DHTPeer> getMembers() {
+		return members;
+	}
+
+	public void addMember(DHTPeer peer) {
+		members.add(peer);
 	}
 }
