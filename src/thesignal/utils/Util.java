@@ -1,5 +1,6 @@
 package thesignal.utils;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.text.DateFormat;
@@ -109,5 +110,11 @@ public final class Util {
 			message = dataObject.toString();
 		}
 		return message;
+	}
+	
+	public static Color mix(Color left, Color right)
+	{
+		Color result = new Color((left.getRed() + right.getRed()) / 2, (left.getGreen() + right.getGreen()) / 2, (left.getBlue() + right.getBlue()) / 2, (left.getAlpha() + right.getAlpha()) / 2);
+		return result;
 	}
 }
