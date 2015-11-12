@@ -3,10 +3,21 @@ package thesignal.entity;
 import java.util.Date;
 
 public class TSMessage {
+	public enum State {
+		None,
+		Unread,
+		Read,
+		Sending,
+		SendOK,
+		SendFailed,
+		SendAcknowledged
+	}
+	
 	private String payload;
 	private TSUser sender;
 	private Date timestamp;
 	private TSGroup recipient;
+	public State state;
 
 	public TSMessage(String payload, TSUser sender, TSGroup recipient,
 			Date timestamp) {
@@ -14,6 +25,7 @@ public class TSMessage {
 		this.sender = sender;
 		this.recipient = recipient;
 		this.timestamp = timestamp;
+		state = State.None;
 	}
 
 	public String getPayload() {
