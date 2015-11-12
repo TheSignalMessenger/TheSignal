@@ -9,6 +9,7 @@ import thesignal.bus.Event;
 import thesignal.bus.EventListener;
 import thesignal.bus.RegisterException;
 import thesignal.bus.UnregisterException;
+import thesignal.bus.commands.SendMessage;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.GotMessages;
 import thesignal.bus.events.GroupAdded;
@@ -39,9 +40,9 @@ public class TSBus extends Bus {
 			TSGroupUI tsGroupUI, TSTextInputUI tsTextInputUI) {
 		try {
 			register(connectToDHT, Started.class);
-			register(sendMessageToDHT, SendMessageToDHT.class);
-			register(readGroupsFromDHT, ReadGroupsFromDHT.class);
-			register(setupMessageReceiving, SetupMessageReceiving.class);
+			register(sendMessageToDHT, SendMessage.class);
+			register(readGroupsFromDHT, ReadGroupsFromDHT.class); // Command not yet there
+			register(setupMessageReceiving, SetupMessageReceiving.class); // Command?! not yet there
 
 			register(busUiAdapter, GotMessages.class);
 			register(busUiAdapter, MessageReceived.class);
