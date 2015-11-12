@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import thesignal.entity.DHTGroup;
+import thesignal.entity.TSGroup;
 import thesignal.manager.GroupManager;
 
 @Singleton
@@ -17,7 +18,7 @@ public class GroupRepository {
 		this.groupManager = groupManager;
 	}
 
-	public List<DHTGroup> findAll() {
+	public List<TSGroup> findAll() {
 		return groupManager.findAll();
 	}
 }
