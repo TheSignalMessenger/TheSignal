@@ -1,5 +1,7 @@
 package thesignal.dht.usecase;
 
+import com.google.inject.Inject;
+
 import thesignal.bus.Bus;
 import thesignal.bus.EventListener;
 import thesignal.bus.events.Connected;
@@ -9,6 +11,7 @@ import thesignal.manager.MeManager;
 public class ReadGroupsFromDHT implements EventListener<Connected> {
 	public MeManager meManager;
 
+	@Inject
 	public ReadGroupsFromDHT(MeManager _meManager) {
 		meManager = _meManager;
 	}
