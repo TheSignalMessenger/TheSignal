@@ -48,6 +48,7 @@ public class TSTextInputUI implements EventListener<Event> {
 						+ (secondDiff < 0 ? " - " : " + ")
 						+ Math.abs(secondDiff) + ": " + text, sender, receiver,
 						new Date(date.getTime() + secondDiff * 1000));
+				message.state = TSMessage.State.Sending;
 
 				SendMessage command =  new SendMessage(message);
 				
