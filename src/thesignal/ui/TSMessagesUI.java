@@ -43,8 +43,26 @@ public class TSMessagesUI implements EventListener<Event> {
 	
 	@Override
 	public void handle(Event event, Bus bus) {
-		// TODO Auto-generated method stub
-		
+		assert(bus == this.bus);
+		if(event instanceof GotMessages)
+		{
+			
+		}
+		else if(event instanceof MessageReceived)
+		{
+			
+		}
+		else if(event instanceof MessageAcknowledged)
+		{
+			
+		}
+		else if(event instanceof MessageSent)
+		{
+			
+		}
+		else if(event instanceof SendingMessageFailed)
+		{
+			
+		}
 	}
-
 }
