@@ -21,15 +21,21 @@ import thesignal.bus.events.MessageReceived;
 import thesignal.entity.TSGroup;
 import thesignal.entity.TSMessage;
 import thesignal.entity.TSUser;
+import thesignal.repository.GroupRepository;
+import thesignal.repository.MeRepository;
 
 public class TSTextInputUI implements EventListener<Event> {
 
 	private JTextField mMessageInput;
 	private Bus bus;
+	private MeRepository meRepository;
+	private GroupRepository groupRepository;
 
 	@Inject
-	public TSTextInputUI(TSBus bus_) {
+	public TSTextInputUI(TSBus bus_, MeRepository meRepository_, GroupRepository groupRepository_) {
 		bus = bus_;
+		meRepository = meRepository_;
+		groupRepository = groupRepository_;
 		
 		mMessageInput = new JTextField();
 		mMessageInput.addActionListener(new MessageSendListener());
@@ -41,8 +47,8 @@ public class TSTextInputUI implements EventListener<Event> {
 			String text = mMessageInput.getText().trim();
 			if (!text.isEmpty()) {
 				Date date = new Date();
-				TSUser sender = new TSUser("Todo");
-				TSGroup receiver = new TSGroup("Todo", Arrays.asList(sender));
+				TSUser sender = meRepository.getTSUser();
+				TSGroup receiver = groupRepository.getSelectedGroup();
 				int secondDiff = new Random(date.getTime()).nextInt(121) - 60;
 				TSMessage message = new TSMessage(date.toString()
 						+ (secondDiff < 0 ? " - " : " + ")
