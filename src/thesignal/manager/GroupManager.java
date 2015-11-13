@@ -14,7 +14,7 @@ import thesignal.entity.TSUser;
 
 @Singleton
 public class GroupManager {
-	private ArrayList<TSGroup> groups;
+	private ArrayList<TSGroup> groups = new ArrayList<TSGroup>();
 
 	public List<TSGroup> findAll() {
 		return groups;
@@ -35,4 +35,8 @@ public class GroupManager {
 		}
 	}
 
+	public int getNumGroups()
+	{
+		return groups.size();
+	}
 }
