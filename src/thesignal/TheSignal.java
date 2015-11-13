@@ -2,6 +2,8 @@ package thesignal;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,11 +27,19 @@ import thesignal.dht.usecase.ReadGroupsFromDHT;
 import thesignal.dht.usecase.SendMessageToDHT;
 import thesignal.dht.usecase.SetupMessageReceiving;
 import thesignal.entity.BusUiAdapter;
+import thesignal.entity.DHTEntity;
+import thesignal.entity.DHTGroup;
+import thesignal.entity.DHTUser;
+import thesignal.entity.TSGroup;
+import thesignal.entity.TSMessage;
 import thesignal.entity.TSUser;
+import thesignal.manager.GroupManager;
+import thesignal.manager.MeManager;
 import thesignal.repository.PeerRepository;
 import thesignal.ui.TSGroupUI;
 import thesignal.ui.TSMessagesUI;
 import thesignal.ui.TSTextInputUI;
+import thesignal.utils.Util;
 
 public class TheSignal extends JFrame {
 	/**
@@ -67,6 +77,27 @@ public class TheSignal extends JFrame {
 			injector.getInstance(TSGroupUI.class),
 			injector.getInstance(TSTextInputUI.class));
 
+		{
+			// Add the Born and Mehrtürer users and the given one.
+			PeerRepository peerRepository = injector.getInstance(PeerRepository.class);
+			TSUser born = new TSUser("born");
+			TSUser mehr = new TSUser("mehrtürer");
+			TSUser me = new TSUser(ownName);
+			try {
+				peerRepository.addPeerHash(me, Number160.createHash(me.name));
+				peerRepository.addPeerHash(born, Number160.createHash(born.name));
+				peerRepository.addPeerHash(mehr, Number160.createHash(mehr.name));
+			} catch (OperationNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			// Just for debugging purposes... Generate a random group.
+			GroupManager groupManager = injector.getInstance(GroupManager.class);
+			TSGroup group = groupManager.addGroup("DemoGroup", Arrays.asList(me, mehr, born), new ArrayList<TSMessage>());
+			group.dhtEntity = new DHTGroup(group.index, group.name(), Util.randNumber160());
+		}
+		
 		// TODO move the following lines to a use case
 		JComponent newContentPane = new JPanel(new BorderLayout());
 
@@ -81,22 +112,6 @@ public class TheSignal extends JFrame {
 		setContentPane(newContentPane);
 
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
-
-		// DEBUG_CODE!
-		PeerRepository peerRepository = injector
-			.getInstance(PeerRepository.class);
-		String[] names = { "mehrtuerer", "born" };
-		for (String name : names) {
-			try {
-				peerRepository.addPeerHash(
-					new TSUser(name),
-					Number160.createHash(name));
-			} catch (OperationNotSupportedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		// END DEBUG_CODE!
 
 		tsBus.raise(new Started());
 	}
