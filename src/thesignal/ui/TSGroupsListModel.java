@@ -1,26 +1,31 @@
 package thesignal.ui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
 
+import com.google.inject.Inject;
+
 import thesignal.bus.events.GroupOrderChanged;
-import thesignal.bus.events.MessageReceived;
 import thesignal.entity.TSGroup;
-import thesignal.entity.TSMessage;
+import thesignal.repository.GroupRepository;
 
 public class TSGroupsListModel extends AbstractListModel implements ListModel {
 	private static final long serialVersionUID = 8373407531972086754L;
 
 	private List<TSGroup> m_Groups = new ArrayList<TSGroup>();
+	private GroupRepository groupRepository;
+	
+	@Inject
+	public TSGroupsListModel(GroupRepository groupRepository_) {
+		groupRepository = groupRepository_;
+	}
 	
 	@Override
 	public TSGroup getElementAt(int arg0) {
-		return m_Groups.get(arg0);
+		return groupRepository.getGroup(arg0);
 	}
 
 	public void handleEvent(GroupOrderChanged event)
@@ -30,6 +35,6 @@ public class TSGroupsListModel extends AbstractListModel implements ListModel {
 	
 	@Override
 	public int getSize() {
-		return m_Groups.size();
+		return groupRepository.getNumGroups();
 	}
 }
