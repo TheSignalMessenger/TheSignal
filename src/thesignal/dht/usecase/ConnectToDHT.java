@@ -13,6 +13,7 @@ import net.tomp2p.peers.Number160;
 import com.google.inject.Inject;
 
 import thesignal.bus.Bus;
+import thesignal.bus.Event;
 import thesignal.bus.EventListener;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.Started;
@@ -20,7 +21,7 @@ import thesignal.entity.DHTUser;
 import thesignal.manager.MeManager;
 import thesignal.manager.PeerHashManager;
 
-public class ConnectToDHT implements EventListener<Started> {
+public class ConnectToDHT implements EventListener<Event> {
 	MeManager meManager;
 	PeerHashManager peerHashManager;
 	String bootstrapHost;
@@ -38,61 +39,64 @@ public class ConnectToDHT implements EventListener<Started> {
 	}
 
 	@Override
-	public void handle(Started event, final Bus bus) {
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				DHTUser dhtUser;
-
-				// TODO: Handle the cases that either tomP2PPeer or fb aren't
-				// correctly initialized (i.e. == null)...
-				try {
-					// TODO get/generate the Hash the correct way...
-					Number160 hash = Number160.createHash("foobar");
-					Peer peer = new PeerMaker(hash)
-						.setPorts(port)
-						.makeAndListen();
-
-					dhtUser = new DHTUser(hash, peer);
-					meManager.setDHTUser(dhtUser);
-					peerHashManager.put(dhtUser, hash);
-				} catch (IOException e) {
-					// TODO do something smart in case of Exception
-					e.printStackTrace();
-					return;
-				}
-
-				boolean success = false;
-				do {
-					FutureBootstrap futureBootstrap = null;
+	public void handle(Event event, final Bus bus) {
+		if(event instanceof Started)
+		{
+			new Thread(new Runnable() {
+	
+				@Override
+				public void run() {
+					DHTUser dhtUser;
+	
+					// TODO: Handle the cases that either tomP2PPeer or fb aren't
+					// correctly initialized (i.e. == null)...
 					try {
-						futureBootstrap = dhtUser.peer
-							.bootstrap()
-							.setInetAddress(
-								InetAddress.getByName(bootstrapHost))
+						// TODO get/generate the Hash the correct way...
+						Number160 hash = Number160.createHash("foobar");
+						Peer peer = new PeerMaker(hash)
 							.setPorts(port)
-							.start();
-					} catch (UnknownHostException e) {
-						// TODO Auto-generated catch block
+							.makeAndListen();
+	
+						dhtUser = new DHTUser(hash, peer);
+						meManager.setDHTUser(dhtUser);
+						peerHashManager.put(dhtUser, hash);
+					} catch (IOException e) {
+						// TODO do something smart in case of Exception
 						e.printStackTrace();
+						return;
 					}
-					futureBootstrap.awaitUninterruptibly();
-					success = futureBootstrap.isSuccess();
-					if (futureBootstrap.getBootstrapTo() != null) {
-						FutureDiscover futureDiscover = dhtUser.peer
-							.discover()
-							.setPeerAddress(
-								futureBootstrap
-									.getBootstrapTo()
-									.iterator()
-									.next())
-							.start();
-						futureDiscover.awaitUninterruptibly();
-					}
-				} while (!success);
-				bus.raise(new Connected());
-			}
-		}).start();
+	
+					boolean success = false;
+					do {
+						FutureBootstrap futureBootstrap = null;
+						try {
+							futureBootstrap = dhtUser.peer
+								.bootstrap()
+								.setInetAddress(
+									InetAddress.getByName(bootstrapHost))
+								.setPorts(port)
+								.start();
+						} catch (UnknownHostException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						futureBootstrap.awaitUninterruptibly();
+						success = futureBootstrap.isSuccess();
+						if (futureBootstrap.getBootstrapTo() != null) {
+							FutureDiscover futureDiscover = dhtUser.peer
+								.discover()
+								.setPeerAddress(
+									futureBootstrap
+										.getBootstrapTo()
+										.iterator()
+										.next())
+								.start();
+							futureDiscover.awaitUninterruptibly();
+						}
+					} while (!success);
+					bus.raise(new Connected());
+				}
+			}).start();
+		}
 	}
 }
