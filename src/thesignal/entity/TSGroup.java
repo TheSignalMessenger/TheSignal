@@ -8,7 +8,7 @@ import javax.naming.OperationNotSupportedException;
 import net.tomp2p.peers.Number160;
 
 public class TSGroup {
-	private Integer index;
+	public final Integer index;
 	private String name;
 	private TreeSet<TSUser> members = new TreeSet<TSUser>();
 	private TreeSet<TSMessage> messages = new TreeSet<TSMessage>();
@@ -35,8 +35,9 @@ public class TSGroup {
 		members.add(peer);
 	}
 	
-	public TSGroup(String name_, Collection<TSUser> members_)
+	public TSGroup(int index_, String name_, Collection<TSUser> members_)
 	{
+		index = index_;
 		name = name_;
 		members.addAll(members_);
 	}
@@ -59,5 +60,5 @@ public class TSGroup {
 		return members.contains(peer);
 	}
 	
-	public Number160 peerHash;
+	public DHTEntity dhtEntity;
 }
