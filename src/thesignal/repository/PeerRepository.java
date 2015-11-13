@@ -17,7 +17,7 @@ public class PeerRepository {
 	public void addPeerHash(TSUser peer, Number160 hash) throws OperationNotSupportedException
 	{
 		Number160 prevHash = peers.put(peer, hash);
-		if(prevHash != null)
+		if(prevHash != null && !prevHash.equals(hash))
 		{
 			throw new OperationNotSupportedException("It is forbidden to manipulate set hashes!");
 		}
