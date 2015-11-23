@@ -1,5 +1,6 @@
 package thesignal.manager;
 
+import net.tomp2p.peers.Number160;
 import thesignal.entity.DHTUser;
 import thesignal.entity.User;
 
@@ -10,7 +11,8 @@ public class MeManager {
 
 	public MeManager() {
 		// @TODO inject name
-		this.tsUser = new User("my name");
+		String name = "my name";
+		this.tsUser = new User(name, Number160.createHash(name));
 	}
 
 	public User getTSUser() {
