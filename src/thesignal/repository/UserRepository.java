@@ -16,7 +16,7 @@ public class UserRepository {
 		userManager = userManager_;
 	}
 	
-	User getUser(DHTEntity entity)
+	public User getUser(DHTEntity entity)
 	{
 		return userManager.getUser(entity);
 	}

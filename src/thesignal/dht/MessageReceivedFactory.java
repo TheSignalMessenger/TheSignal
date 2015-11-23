@@ -6,6 +6,7 @@ import java.util.Date;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import thesignal.bus.events.MessageReceived;
@@ -13,19 +14,27 @@ import thesignal.entity.DHTMessage;
 import thesignal.entity.Group;
 import thesignal.entity.TSMessage;
 import thesignal.entity.User;
+import thesignal.manager.UserManager;
+import thesignal.repository.UserRepository;
 
 @Singleton
 public class MessageReceivedFactory {
 
+	UserRepository userRepository;
+
+	@Inject
+	public MessageReceivedFactory(UserRepository _userRepository) {
+		userRepository = _userRepository;
+	}
+
 	public MessageReceived createFromDHT(Data data, Group receiver) {
 		MessageReceived messageReceived = new MessageReceived();
-		messageReceived.message = new TSMessage(
-				getMessagePayload(data), getSender(data), receiver,
-				getDate(data));
+		messageReceived.message = new TSMessage(getMessagePayload(data),
+				getSender(data), receiver, getDate(data));
 
 		return messageReceived;
 	}
-	
+
 	private String getMessagePayload(Data data) {
 		String content = "";
 		Object dataObject = null;
@@ -64,7 +73,8 @@ public class MessageReceivedFactory {
 	private User getSender(Data data) {
 		try {
 			DHTMessage msg = (DHTMessage) data.getObject();
-			return new User(msg.senderName);
+
+			return userRepository.getUser(msg.sender);
 		} catch (ClassNotFoundException e) {
 			// e.printStackTrace();
 		} catch (IOException e) {
@@ -72,7 +82,7 @@ public class MessageReceivedFactory {
 			e.printStackTrace();
 		} catch (ClassCastException e) {
 		}
-		
+
 		return null;
 	}
 }
