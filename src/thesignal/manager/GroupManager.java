@@ -21,8 +21,8 @@ public class GroupManager {
 	}
 
 	public Group addGroup(String name_, Collection<User> members_,
-			Collection<TSMessage> messages_) {
-		Group group = new Group(groups.size(), name_, members_, messages_);
+			Collection<TSMessage> messages_, Number160 _hash) {
+		Group group = new Group(groups.size(), name_, members_, messages_, _hash);
 		groups.add(group);
 		return group;
 	}

@@ -94,7 +94,7 @@ public class TheSignal extends JFrame {
 			
 			// Just for debugging purposes... Generate a random group.
 			GroupManager groupManager = injector.getInstance(GroupManager.class);
-			Group group = groupManager.addGroup("DemoGroup", Arrays.asList(me, mehr, born), new ArrayList<TSMessage>());
+			Group group = groupManager.addGroup("DemoGroup", Arrays.asList(me, mehr, born), new ArrayList<TSMessage>(),  Number160.createHash("Demo Group"));
 			group.dhtEntity = new DHTGroup(group.index, group.name(), Util.randNumber160());
 		}
 		
