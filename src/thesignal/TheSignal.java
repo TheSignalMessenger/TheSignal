@@ -80,9 +80,9 @@ public class TheSignal extends JFrame {
 		{
 			// Add the Born and Mehrtürer users and the given one.
 			PeerRepository peerRepository = injector.getInstance(PeerRepository.class);
-			User born = new User("born");
-			User mehr = new User("mehrtürer");
-			User me = new User(ownName);
+			User born = new User("born", Number160.createHash("born"));
+			User mehr = new User("mehrtürer", Number160.createHash("mehrtürer"));
+			User me = new User(ownName, Number160.createHash(ownName));
 			try {
 				peerRepository.addPeerHash(me, Number160.createHash(me.name));
 				peerRepository.addPeerHash(born, Number160.createHash(born.name));
