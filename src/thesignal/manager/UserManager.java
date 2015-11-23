@@ -2,9 +2,12 @@ package thesignal.manager;
 
 import java.util.HashMap;
 
+import com.google.inject.Singleton;
+
 import thesignal.entity.DHTEntity;
 import thesignal.entity.User;
 
+@Singleton
 public class UserManager {
 	private HashMap<DHTEntity, User> users = new HashMap<DHTEntity, User>();
 	
