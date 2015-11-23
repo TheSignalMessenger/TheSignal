@@ -18,9 +18,9 @@ import thesignal.bus.RegisterException;
 import thesignal.bus.commands.SendMessage;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.MessageReceived;
-import thesignal.entity.TSGroup;
+import thesignal.entity.Group;
 import thesignal.entity.TSMessage;
-import thesignal.entity.TSUser;
+import thesignal.entity.User;
 import thesignal.repository.GroupRepository;
 import thesignal.repository.MeRepository;
 
@@ -47,8 +47,8 @@ public class TSTextInputUI implements EventListener<Event> {
 			String text = mMessageInput.getText().trim();
 			if (!text.isEmpty()) {
 				Date date = new Date();
-				TSUser sender = meRepository.getTSUser();
-				TSGroup receiver = groupRepository.getSelectedGroup();
+				User sender = meRepository.getTSUser();
+				Group receiver = groupRepository.getSelectedGroup();
 				int secondDiff = new Random(date.getTime()).nextInt(121) - 60;
 				TSMessage message = new TSMessage(date.toString()
 						+ (secondDiff < 0 ? " - " : " + ")

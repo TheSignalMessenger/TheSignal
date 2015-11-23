@@ -7,20 +7,29 @@ import javax.naming.OperationNotSupportedException;
 
 import net.tomp2p.peers.Number160;
 
-public class TSGroup {
+public class Group extends DHTEntity {
 	public final Integer index;
 	private String name;
-	private TreeSet<TSUser> members = new TreeSet<TSUser>();
+	private TreeSet<User> members = new TreeSet<User>();
 	private TreeSet<TSMessage> messages = new TreeSet<TSMessage>();
 
 	private boolean immutable;
 	
-	public TSGroup(int index_, String name_, Collection<TSUser> members_, Collection<TSMessage> messages_) {
+	public Group(int index_, String name_, Collection<User> members_, Collection<TSMessage> messages_, Number160 hash) {
+		super(hash);
 		index = index_;
 		name = name_;
 		members.addAll(members_);
 		messages.addAll(messages_);
 		immutable = true;
+	}
+	
+	public Group(int index_, String name_, Collection<User> members_, Number160 hash)
+	{
+		super(hash);
+		index = index_;
+		name = name_;
+		members.addAll(members_);
 	}
 	
 	public void addMessage(TSMessage message) throws OperationNotSupportedException
@@ -29,17 +38,10 @@ public class TSGroup {
 		messages.add(message);
 	}
 	
-	public void addMember(TSUser peer) throws OperationNotSupportedException
+	public void addMember(User peer) throws OperationNotSupportedException
 	{
 		checkMutability();
 		members.add(peer);
-	}
-	
-	public TSGroup(int index_, String name_, Collection<TSUser> members_)
-	{
-		index = index_;
-		name = name_;
-		members.addAll(members_);
 	}
 	
 	public String name()
@@ -55,7 +57,7 @@ public class TSGroup {
 		}
 	}
 	
-	public boolean isMember(TSUser peer)
+	public boolean isMember(User peer)
 	{
 		return members.contains(peer);
 	}

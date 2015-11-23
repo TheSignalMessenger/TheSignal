@@ -1,7 +1,7 @@
 package thesignal.repository;
 
 import thesignal.entity.DHTUser;
-import thesignal.entity.TSUser;
+import thesignal.entity.User;
 import thesignal.manager.MeManager;
 
 import com.google.inject.Inject;
@@ -17,7 +17,7 @@ public class MeRepository {
 		this.meManager = meManager;
 	}
 	
-	public TSUser getTSUser() {
+	public User getTSUser() {
 		return meManager.getTSUser();
 	}
 	

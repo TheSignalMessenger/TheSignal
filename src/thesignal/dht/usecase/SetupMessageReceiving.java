@@ -1,6 +1,5 @@
 package thesignal.dht.usecase;
 
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -10,8 +9,7 @@ import thesignal.bus.Bus;
 import thesignal.bus.EventListener;
 import thesignal.bus.events.Connected;
 import thesignal.dht.MessageReceivedFactory;
-import thesignal.entity.DHTGroup;
-import thesignal.entity.TSGroup;
+import thesignal.entity.Group;
 import thesignal.repository.GroupRepository;
 import thesignal.repository.KnownPeersRepository;
 import thesignal.repository.MeRepository;
@@ -44,7 +42,7 @@ public class SetupMessageReceiving implements EventListener<Connected>{
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				for(TSGroup group : groupRepository.findAll()) {
+				for(Group group : groupRepository.findAll()) {
 					
 					// TODO getPeer 
 					/*

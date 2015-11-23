@@ -5,16 +5,16 @@ import java.util.Collections;
 import java.util.List;
 
 import thesignal.bus.Event;
-import thesignal.entity.TSGroup;
+import thesignal.entity.Group;
 
 public class GroupOrderChanged implements Event {
-	public final List<TSGroup> groupOrder;
+	public final List<Group> groupOrder;
 	
-	public GroupOrderChanged(ArrayList<TSGroup> groupOrder_) {
-		groupOrder = Collections.unmodifiableList(new ArrayList<TSGroup>(groupOrder_));
+	public GroupOrderChanged(ArrayList<Group> groupOrder_) {
+		groupOrder = Collections.unmodifiableList(new ArrayList<Group>(groupOrder_));
 	}
 
-	public GroupOrderChanged(List<TSGroup> groupOrder_) {
-		groupOrder = Collections.unmodifiableList(new ArrayList<TSGroup>(groupOrder_));
+	public GroupOrderChanged(List<Group> groupOrder_) {
+		groupOrder = Collections.unmodifiableList(new ArrayList<Group>(groupOrder_));
 	}
 }

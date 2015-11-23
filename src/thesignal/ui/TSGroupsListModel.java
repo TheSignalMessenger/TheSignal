@@ -9,13 +9,13 @@ import javax.swing.ListModel;
 import com.google.inject.Inject;
 
 import thesignal.bus.events.GroupOrderChanged;
-import thesignal.entity.TSGroup;
+import thesignal.entity.Group;
 import thesignal.repository.GroupRepository;
 
 public class TSGroupsListModel extends AbstractListModel implements ListModel {
 	private static final long serialVersionUID = 8373407531972086754L;
 
-	private List<TSGroup> m_Groups = new ArrayList<TSGroup>();
+	private List<Group> m_Groups = new ArrayList<Group>();
 	private GroupRepository groupRepository;
 	
 	@Inject
@@ -24,7 +24,7 @@ public class TSGroupsListModel extends AbstractListModel implements ListModel {
 	}
 	
 	@Override
-	public TSGroup getElementAt(int arg0) {
+	public Group getElementAt(int arg0) {
 		return groupRepository.getGroup(arg0);
 	}
 

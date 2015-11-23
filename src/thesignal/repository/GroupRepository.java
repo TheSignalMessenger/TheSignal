@@ -5,7 +5,7 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import thesignal.entity.TSGroup;
+import thesignal.entity.Group;
 import thesignal.manager.GroupManager;
 
 @Singleton
@@ -18,7 +18,7 @@ public class GroupRepository {
 		this.groupManager = groupManager;
 	}
 
-	public List<TSGroup> findAll() {
+	public List<Group> findAll() {
 		return groupManager.findAll();
 	}
 	
@@ -27,7 +27,7 @@ public class GroupRepository {
 		selectedGroupIndex = index;
 	}
 	
-	public TSGroup getSelectedGroup()
+	public Group getSelectedGroup()
 	{
 		return groupManager.getGroup(selectedGroupIndex);
 	}
@@ -37,7 +37,7 @@ public class GroupRepository {
 		return groupManager.getNumGroups();
 	}
 	
-	public TSGroup getGroup(int index)
+	public Group getGroup(int index)
 	{
 		return groupManager.getGroup(index);
 	}

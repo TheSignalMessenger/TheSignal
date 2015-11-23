@@ -8,13 +8,13 @@ import net.tomp2p.peers.Number160;
 
 import com.google.inject.Singleton;
 
-import thesignal.entity.TSUser;
+import thesignal.entity.User;
 
 @Singleton
 public class PeerRepository {
-	HashMap<TSUser, Number160> peers = new HashMap<TSUser, Number160>();
+	HashMap<User, Number160> peers = new HashMap<User, Number160>();
 	
-	public void addPeerHash(TSUser peer, Number160 hash) throws OperationNotSupportedException
+	public void addPeerHash(User peer, Number160 hash) throws OperationNotSupportedException
 	{
 		Number160 prevHash = peers.put(peer, hash);
 		if(prevHash != null && !prevHash.equals(hash))
@@ -23,7 +23,7 @@ public class PeerRepository {
 		}
 	}
 	
-	public Number160 findOne(TSUser peer)
+	public Number160 findOne(User peer)
 	{
 		return peers.get(peer);
 	}

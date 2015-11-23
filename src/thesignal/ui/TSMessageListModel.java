@@ -8,13 +8,13 @@ import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
 
 import thesignal.bus.events.MessageReceived;
-import thesignal.entity.TSGroup;
+import thesignal.entity.Group;
 import thesignal.entity.TSMessage;
 
 public class TSMessageListModel extends AbstractListModel implements ListModel, Comparator<TSMessage> {
 	private static final long serialVersionUID = 8373407531972086754L;
 
-	private TSGroup group;
+	private Group group;
 	private ArrayList<TSMessage> m_Messages = new ArrayList<TSMessage>();
 	
 	@Override

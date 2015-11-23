@@ -10,14 +10,14 @@ import com.google.inject.Singleton;
 
 import thesignal.bus.events.MessageReceived;
 import thesignal.entity.DHTMessage;
-import thesignal.entity.TSGroup;
+import thesignal.entity.Group;
 import thesignal.entity.TSMessage;
-import thesignal.entity.TSUser;
+import thesignal.entity.User;
 
 @Singleton
 public class MessageReceivedFactory {
 
-	public MessageReceived createFromDHT(Data data, TSGroup receiver) {
+	public MessageReceived createFromDHT(Data data, Group receiver) {
 		MessageReceived messageReceived = new MessageReceived();
 		messageReceived.message = new TSMessage(
 				getMessagePayload(data), getSender(data), receiver,
@@ -61,10 +61,10 @@ public class MessageReceivedFactory {
 		return new Date(createdMS);
 	}
 
-	private TSUser getSender(Data data) {
+	private User getSender(Data data) {
 		try {
 			DHTMessage msg = (DHTMessage) data.getObject();
-			return new TSUser(msg.senderName);
+			return new User(msg.senderName);
 		} catch (ClassNotFoundException e) {
 			// e.printStackTrace();
 		} catch (IOException e) {

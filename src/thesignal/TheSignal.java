@@ -30,9 +30,9 @@ import thesignal.entity.BusUiAdapter;
 import thesignal.entity.DHTEntity;
 import thesignal.entity.DHTGroup;
 import thesignal.entity.DHTUser;
-import thesignal.entity.TSGroup;
+import thesignal.entity.Group;
 import thesignal.entity.TSMessage;
-import thesignal.entity.TSUser;
+import thesignal.entity.User;
 import thesignal.manager.GroupManager;
 import thesignal.manager.MeManager;
 import thesignal.repository.PeerRepository;
@@ -80,9 +80,9 @@ public class TheSignal extends JFrame {
 		{
 			// Add the Born and Mehrtürer users and the given one.
 			PeerRepository peerRepository = injector.getInstance(PeerRepository.class);
-			TSUser born = new TSUser("born");
-			TSUser mehr = new TSUser("mehrtürer");
-			TSUser me = new TSUser(ownName);
+			User born = new User("born");
+			User mehr = new User("mehrtürer");
+			User me = new User(ownName);
 			try {
 				peerRepository.addPeerHash(me, Number160.createHash(me.name));
 				peerRepository.addPeerHash(born, Number160.createHash(born.name));
@@ -94,7 +94,7 @@ public class TheSignal extends JFrame {
 			
 			// Just for debugging purposes... Generate a random group.
 			GroupManager groupManager = injector.getInstance(GroupManager.class);
-			TSGroup group = groupManager.addGroup("DemoGroup", Arrays.asList(me, mehr, born), new ArrayList<TSMessage>());
+			Group group = groupManager.addGroup("DemoGroup", Arrays.asList(me, mehr, born), new ArrayList<TSMessage>());
 			group.dhtEntity = new DHTGroup(group.index, group.name(), Util.randNumber160());
 		}
 		

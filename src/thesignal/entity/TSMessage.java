@@ -14,12 +14,12 @@ public class TSMessage {
 	}
 	
 	private String payload;
-	private TSUser sender;
+	private User sender;
 	private Date timestamp;
-	private TSGroup recipient;
+	private Group recipient;
 	public State state;
 
-	public TSMessage(String payload, TSUser sender, TSGroup recipient,
+	public TSMessage(String payload, User sender, Group recipient,
 			Date timestamp) {
 		this.payload = payload;
 		this.sender = sender;
@@ -32,7 +32,7 @@ public class TSMessage {
 		return payload;
 	}
 
-	public TSUser getSender() {
+	public User getSender() {
 		return sender;
 	}
 
@@ -40,7 +40,7 @@ public class TSMessage {
 		return timestamp;
 	}
 
-	public TSGroup getReceiver() {
+	public Group getReceiver() {
 		return recipient;
 	}
 }

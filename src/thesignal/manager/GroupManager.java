@@ -8,26 +8,26 @@ import net.tomp2p.peers.Number160;
 
 import com.google.inject.Singleton;
 
-import thesignal.entity.TSGroup;
+import thesignal.entity.Group;
 import thesignal.entity.TSMessage;
-import thesignal.entity.TSUser;
+import thesignal.entity.User;
 
 @Singleton
 public class GroupManager {
-	private ArrayList<TSGroup> groups = new ArrayList<TSGroup>();
+	private ArrayList<Group> groups = new ArrayList<Group>();
 
-	public List<TSGroup> findAll() {
+	public List<Group> findAll() {
 		return groups;
 	}
 
-	public TSGroup addGroup(String name_, Collection<TSUser> members_,
+	public Group addGroup(String name_, Collection<User> members_,
 			Collection<TSMessage> messages_) {
-		TSGroup group = new TSGroup(groups.size(), name_, members_, messages_);
+		Group group = new Group(groups.size(), name_, members_, messages_);
 		groups.add(group);
 		return group;
 	}
 
-	public TSGroup getGroup(int index) {
+	public Group getGroup(int index) {
 		if (groups.size() > index) {
 			return groups.get(index);
 		} else {

@@ -2,7 +2,7 @@ package thesignal.repository;
 
 import net.tomp2p.peers.Number160;
 import thesignal.entity.DHTEntity;
-import thesignal.entity.TSUser;
+import thesignal.entity.User;
 import thesignal.manager.PeerHashManager;
 
 import com.google.inject.Guice;
