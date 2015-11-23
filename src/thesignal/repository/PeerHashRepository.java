@@ -2,12 +2,9 @@ package thesignal.repository;
 
 import net.tomp2p.peers.Number160;
 import thesignal.entity.DHTEntity;
-import thesignal.entity.User;
 import thesignal.manager.PeerHashManager;
 
-import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 @Singleton
