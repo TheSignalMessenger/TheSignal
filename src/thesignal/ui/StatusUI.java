@@ -29,7 +29,7 @@ public class StatusUI implements EventListener<Event> {
 	@Override
 	public void handle(Event event, Bus bus) {
 		if (event instanceof Started) {
-			mStatusLabel.setText("Started");
+			mStatusLabel.setText("Connecting...");
 		} else if (event instanceof Connected) {
 			mStatusLabel.setText("Connected");
 		}
