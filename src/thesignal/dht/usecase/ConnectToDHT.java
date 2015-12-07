@@ -55,8 +55,6 @@ public class ConnectToDHT implements EventListener<Event> {
 						meManager.peer = new PeerMaker(hash)
 							.setPorts(port)
 							.makeAndListen();
-
-						meManager.user = new User("TODO", hash);
 						peerHashManager.put(meManager.user, hash);
 					} catch (IOException e) {
 						// TODO do something smart in case of Exception
