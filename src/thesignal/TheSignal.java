@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javax.naming.OperationNotSupportedException;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -36,6 +37,7 @@ import thesignal.entity.User;
 import thesignal.manager.GroupManager;
 import thesignal.manager.MeManager;
 import thesignal.repository.PeerRepository;
+import thesignal.ui.StatusUI;
 import thesignal.ui.TSGroupUI;
 import thesignal.ui.TSMessagesUI;
 import thesignal.ui.TSTextInputUI;
@@ -75,7 +77,8 @@ public class TheSignal extends JFrame {
 			injector.getInstance(BusUiAdapter.class),
 			injector.getInstance(TSMessagesUI.class),
 			injector.getInstance(TSGroupUI.class),
-			injector.getInstance(TSTextInputUI.class));
+			injector.getInstance(TSTextInputUI.class),
+			injector.getInstance(StatusUI.class));
 
 		{
 			// Add the Born and Mehrtürer users and the given one.
@@ -117,13 +120,17 @@ public class TheSignal extends JFrame {
 		// TODO move the following lines to a use case
 		JComponent newContentPane = new JPanel(new BorderLayout());
 
+		JPanel messagesContainer = new JPanel(new BorderLayout());
 		JTextField messageInputField = initializeTextInput();
 		JScrollPane messagesListScrollPane = initializeMessagesList();
 		JScrollPane groupsListScrollPane = initializeGroupsList();
+		JLabel statusLabel = injector.getInstance(StatusUI.class).getStatusLabel();
 
-		newContentPane.add(messagesListScrollPane, BorderLayout.CENTER);
-		newContentPane.add(messageInputField, BorderLayout.PAGE_END);
+		messagesContainer.add(messagesListScrollPane, BorderLayout.CENTER);
+		messagesContainer.add(messageInputField, BorderLayout.SOUTH);
+		newContentPane.add(messagesContainer, BorderLayout.CENTER);
 		newContentPane.add(groupsListScrollPane, BorderLayout.EAST);
+		newContentPane.add(statusLabel, BorderLayout.PAGE_END);
 
 		setContentPane(newContentPane);
 

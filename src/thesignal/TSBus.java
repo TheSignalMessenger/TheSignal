@@ -24,6 +24,7 @@ import thesignal.dht.usecase.ReadGroupsFromDHT;
 import thesignal.dht.usecase.SendMessageToDHT;
 import thesignal.dht.usecase.SetupMessageReceiving;
 import thesignal.entity.BusUiAdapter;
+import thesignal.ui.StatusUI;
 import thesignal.ui.TSGroupUI;
 import thesignal.ui.TSMessagesUI;
 import thesignal.ui.TSTextInputUI;
@@ -37,8 +38,11 @@ public class TSBus extends Bus {
 			ReadGroupsFromDHT readGroupsFromDHT,
 			SetupMessageReceiving setupMessageReceiving,
 			BusUiAdapter busUiAdapter, TSMessagesUI tsMessagesUI,
-			TSGroupUI tsGroupUI, TSTextInputUI tsTextInputUI) {
+			TSGroupUI tsGroupUI, TSTextInputUI tsTextInputUI, StatusUI statusUI) {
 		try {
+			register(statusUI, Started.class);
+			register(statusUI, Connected.class);
+
 			register(connectToDHT, Started.class);
 			register(sendMessageToDHT, SendMessage.class);
 			register(readGroupsFromDHT, ReadGroupsFromDHT.class); // Command not yet there
@@ -83,7 +87,7 @@ public class TSBus extends Bus {
 			SetupMessageReceiving setupMessageReceiving,
 			BusUiAdapter busUiAdapter)
 	{
-		setup(connectToDHT, sendMessageToDHT, readGroupsFromDHT, setupMessageReceiving, busUiAdapter, null, null, null);
+		setup(connectToDHT, sendMessageToDHT, readGroupsFromDHT, setupMessageReceiving, busUiAdapter, null, null, null, null);
 	}
 	
 	public void initializeMessagesUI(EventListener<Event> messagesUI)

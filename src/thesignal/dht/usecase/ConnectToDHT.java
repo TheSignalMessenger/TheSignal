@@ -34,8 +34,8 @@ public class ConnectToDHT implements EventListener<Event> {
 		this.meManager = meManager;
 
 		// TODO read the following info from somewhere else
-		this.bootstrapHost = "tsp.no-ip.org";
-		// or "user.nullteilerfrei.de"
+//		this.bootstrapHost = "tsp.no-ip.org";
+		this.bootstrapHost = "user.nullteilerfrei.de";
 		this.port = 4242;
 	}
 
