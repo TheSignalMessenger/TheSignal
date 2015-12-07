@@ -3,18 +3,15 @@ package thesignal.dht;
 import java.io.IOException;
 import java.util.Date;
 
-import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import thesignal.bus.events.MessageReceived;
 import thesignal.entity.Group;
 import thesignal.entity.Message;
 import thesignal.entity.User;
-import thesignal.manager.UserManager;
 import thesignal.repository.UserRepository;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 public class MessageReceivedFactory {

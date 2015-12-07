@@ -2,11 +2,11 @@ package thesignal.repository;
 
 import java.util.List;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import thesignal.entity.Group;
 import thesignal.manager.GroupManager;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 public class GroupRepository {

@@ -2,8 +2,6 @@ package thesignal;
 
 import java.util.logging.Logger;
 
-import com.google.inject.Singleton;
-
 import thesignal.bus.Bus;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
@@ -28,6 +26,8 @@ import thesignal.ui.StatusUI;
 import thesignal.ui.TSGroupUI;
 import thesignal.ui.TSMessagesUI;
 import thesignal.ui.TSTextInputUI;
+
+import com.google.inject.Singleton;
 
 @Singleton
 public class TSBus extends Bus {

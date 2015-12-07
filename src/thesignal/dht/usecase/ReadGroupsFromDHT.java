@@ -1,12 +1,11 @@
 package thesignal.dht.usecase;
 
-import com.google.inject.Inject;
-
 import thesignal.bus.Bus;
 import thesignal.bus.EventListener;
 import thesignal.bus.events.Connected;
-import thesignal.entity.DHTUser;
 import thesignal.manager.MeManager;
+
+import com.google.inject.Inject;
 
 public class ReadGroupsFromDHT implements EventListener<Connected> {
 	public MeManager meManager;

@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,19 +16,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import net.tomp2p.peers.Number160;
-import thesignal.bus.events.Connected;
 import thesignal.bus.events.Started;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 import thesignal.dht.usecase.ConnectToDHT;
 import thesignal.dht.usecase.ReadGroupsFromDHT;
 import thesignal.dht.usecase.SendMessageToDHT;
 import thesignal.dht.usecase.SetupMessageReceiving;
 import thesignal.entity.BusUiAdapter;
-import thesignal.entity.DHTEntity;
-import thesignal.entity.DHTUser;
 import thesignal.entity.Group;
 import thesignal.entity.Message;
 import thesignal.entity.User;
@@ -43,6 +34,9 @@ import thesignal.ui.TSGroupUI;
 import thesignal.ui.TSMessagesUI;
 import thesignal.ui.TSTextInputUI;
 import thesignal.utils.Util;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class TheSignal extends JFrame {
 	/**

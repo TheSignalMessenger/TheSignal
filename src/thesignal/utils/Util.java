@@ -3,14 +3,12 @@ package thesignal.utils;
 import java.awt.Color;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
 
 import thesignal.entity.Message;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
+import thesignal.entity.DHTMessage;
 
 public final class Util {
     public static Number160 add(final Number160 left, final Number160 right)

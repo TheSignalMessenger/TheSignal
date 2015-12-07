@@ -6,21 +6,17 @@ import java.net.UnknownHostException;
 
 import net.tomp2p.futures.FutureBootstrap;
 import net.tomp2p.futures.FutureDiscover;
-import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerMaker;
 import net.tomp2p.peers.Number160;
-
-import com.google.inject.Inject;
-
 import thesignal.bus.Bus;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.Started;
-import thesignal.entity.DHTUser;
-import thesignal.entity.User;
 import thesignal.manager.MeManager;
 import thesignal.manager.PeerHashManager;
+
+import com.google.inject.Inject;
 
 public class ConnectToDHT implements EventListener<Event> {
 	MeManager meManager;

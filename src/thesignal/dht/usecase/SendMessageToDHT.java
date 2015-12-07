@@ -3,9 +3,6 @@ package thesignal.dht.usecase;
 import java.io.IOException;
 import java.util.Date;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import net.tomp2p.futures.FutureDHT;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
@@ -18,6 +15,9 @@ import thesignal.dht.ContentKeyFactory;
 import thesignal.entity.Message;
 import thesignal.manager.MeManager;
 import thesignal.repository.PeerRepository;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 public class SendMessageToDHT implements CommandHandler<SendMessage> {

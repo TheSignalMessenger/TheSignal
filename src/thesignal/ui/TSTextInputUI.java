@@ -2,27 +2,23 @@ package thesignal.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Random;
 
 import javax.swing.JTextField;
 
-import com.google.inject.Inject;
-
 import thesignal.TSBus;
 import thesignal.bus.Bus;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
-import thesignal.bus.RegisterException;
 import thesignal.bus.commands.SendMessage;
-import thesignal.bus.events.Connected;
-import thesignal.bus.events.MessageReceived;
 import thesignal.entity.Group;
 import thesignal.entity.Message;
 import thesignal.entity.User;
 import thesignal.manager.MeManager;
 import thesignal.repository.GroupRepository;
+
+import com.google.inject.Inject;
 
 public class TSTextInputUI implements EventListener<Event> {
 

@@ -2,14 +2,14 @@ package thesignal.ui;
 
 import javax.swing.JLabel;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import thesignal.bus.Bus;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.Started;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 public class StatusUI implements EventListener<Event> {

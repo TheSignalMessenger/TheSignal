@@ -5,12 +5,11 @@ import java.util.Collection;
 import java.util.List;
 
 import net.tomp2p.peers.Number160;
-
-import com.google.inject.Singleton;
-
 import thesignal.entity.Group;
 import thesignal.entity.Message;
 import thesignal.entity.User;
+
+import com.google.inject.Singleton;
 
 @Singleton
 public class GroupManager {

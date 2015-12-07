@@ -3,18 +3,17 @@ package thesignal.ui;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
-import com.google.inject.Inject;
-
 import thesignal.TSBus;
 import thesignal.bus.Bus;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
-import thesignal.bus.RegisterException;
 import thesignal.bus.events.GotMessages;
 import thesignal.bus.events.MessageAcknowledged;
 import thesignal.bus.events.MessageReceived;
 import thesignal.bus.events.MessageSent;
 import thesignal.bus.events.SendingMessageFailed;
+
+import com.google.inject.Inject;
 
 public class TSMessagesUI implements EventListener<Event> {
 

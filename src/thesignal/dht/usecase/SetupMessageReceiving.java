@@ -3,8 +3,6 @@ package thesignal.dht.usecase;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.google.inject.Inject;
-
 import thesignal.bus.Bus;
 import thesignal.bus.EventListener;
 import thesignal.bus.events.Connected;
@@ -14,6 +12,8 @@ import thesignal.manager.MeManager;
 import thesignal.repository.GroupRepository;
 import thesignal.repository.KnownPeersRepository;
 import thesignal.repository.PeerHashRepository;
+
+import com.google.inject.Inject;
 
 public class SetupMessageReceiving implements EventListener<Connected> {
 

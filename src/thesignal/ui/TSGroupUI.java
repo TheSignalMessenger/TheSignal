@@ -6,12 +6,12 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.google.inject.Inject;
-
 import thesignal.bus.Bus;
 import thesignal.bus.Event;
 import thesignal.bus.EventListener;
 import thesignal.repository.GroupRepository;
+
+import com.google.inject.Inject;
 
 public class TSGroupUI implements EventListener<Event> {
 	private TSGroupsListModel groupsListModel;

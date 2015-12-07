@@ -6,10 +6,9 @@ import java.util.Map.Entry;
 import javax.naming.OperationNotSupportedException;
 
 import net.tomp2p.peers.Number160;
+import thesignal.entity.User;
 
 import com.google.inject.Singleton;
-
-import thesignal.entity.User;
 
 @Singleton
 public class PeerRepository {

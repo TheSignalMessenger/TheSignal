@@ -6,11 +6,11 @@ import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
 
-import com.google.inject.Inject;
-
 import thesignal.bus.events.GroupOrderChanged;
 import thesignal.entity.Group;
 import thesignal.repository.GroupRepository;
+
+import com.google.inject.Inject;
 
 public class TSGroupsListModel extends AbstractListModel implements ListModel {
 	private static final long serialVersionUID = 8373407531972086754L;
