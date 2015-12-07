@@ -18,7 +18,6 @@ public class ReadGroupsFromDHT implements EventListener<Connected> {
 
 	@Override
 	public void handle(Connected event, Bus bus) {
-		DHTUser dhtUser = meManager.getDHTUser();
-		// dhtUser.peer.get(dhtUser.hash).getContentKeys();
+		// dhtUser.peer.get(meManager.user.hash).getContentKeys();
 	}
 }

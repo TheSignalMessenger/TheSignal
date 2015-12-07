@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +29,6 @@ import thesignal.dht.usecase.SendMessageToDHT;
 import thesignal.dht.usecase.SetupMessageReceiving;
 import thesignal.entity.BusUiAdapter;
 import thesignal.entity.DHTEntity;
-import thesignal.entity.DHTGroup;
 import thesignal.entity.DHTUser;
 import thesignal.entity.Group;
 import thesignal.entity.TSMessage;
@@ -79,25 +79,41 @@ public class TheSignal extends JFrame {
 
 		{
 			// Add the Born and Mehrtürer users and the given one.
-			PeerRepository peerRepository = injector.getInstance(PeerRepository.class);
+			PeerRepository peerRepository = injector
+				.getInstance(PeerRepository.class);
+			MeManager meManager = injector.getInstance(MeManager.class);
 			User born = new User("born", Number160.createHash("born"));
 			User mehr = new User("mehrtürer", Number160.createHash("mehrtürer"));
-			User me = new User(ownName, Number160.createHash(ownName));
+
+			meManager.user = new User(ownName, Number160.createHash(ownName));
+
 			try {
-				peerRepository.addPeerHash(me, Number160.createHash(me.name));
-				peerRepository.addPeerHash(born, Number160.createHash(born.name));
-				peerRepository.addPeerHash(mehr, Number160.createHash(mehr.name));
+				peerRepository.addPeerHash(
+					meManager.user,
+					Number160.createHash(meManager.user.name));
+				peerRepository.addPeerHash(
+					born,
+					Number160.createHash(born.name));
+				peerRepository.addPeerHash(
+					mehr,
+					Number160.createHash(mehr.name));
 			} catch (OperationNotSupportedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			// Just for debugging purposes... Generate a random group.
-			GroupManager groupManager = injector.getInstance(GroupManager.class);
-			Group group = groupManager.addGroup("DemoGroup", Arrays.asList(me, mehr, born), new ArrayList<TSMessage>(),  Number160.createHash("Demo Group"));
-			group.dhtEntity = new DHTGroup(group.index, group.name(), Util.randNumber160());
+			GroupManager groupManager = injector
+				.getInstance(GroupManager.class);
+			Group group = groupManager.addGroup(
+				"DemoGroup",
+				Arrays.asList(meManager.user, mehr, born),
+				new ArrayList<TSMessage>(),
+				Number160.createHash("Demo Group"));
+			group.dhtEntity = new Group(group.index, group.name(),
+					new ArrayList<User>(), Util.randNumber160());
 		}
-		
+
 		// TODO move the following lines to a use case
 		JComponent newContentPane = new JPanel(new BorderLayout());
 

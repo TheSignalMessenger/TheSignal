@@ -16,21 +16,21 @@ import thesignal.bus.events.MessageSent;
 import thesignal.bus.events.SendingMessageFailed;
 import thesignal.dht.ContentKeyFactory;
 import thesignal.entity.DHTMessage;
-import thesignal.repository.MeRepository;
+import thesignal.manager.MeManager;
 import thesignal.repository.PeerRepository;
 
 @Singleton
 public class SendMessageToDHT implements CommandHandler<SendMessage> {
 	private ContentKeyFactory contentKeyFactory;
 	private PeerRepository peerRepository;
-	private MeRepository meProvider;
+	private MeManager meManager;
 
 	@Inject
 	public SendMessageToDHT(PeerRepository peerRepository,
-			ContentKeyFactory contentKeyFactory, MeRepository meProvider) {
+			ContentKeyFactory contentKeyFactory, MeManager meManager) {
 		this.contentKeyFactory = contentKeyFactory;
 		this.peerRepository = peerRepository;
-		this.meProvider = meProvider;
+		this.meManager = meManager;
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 		DHTMessage msg = new DHTMessage();
 		msg.createdDateTime = new Date().getTime();
 		msg.payload = value;
-		return meProvider.getDHTUser().peer
+		return meManager.peer
 			.put(location)
 			.setData(contentKey, new Data(msg))
 			.setDomainKey(domain)
