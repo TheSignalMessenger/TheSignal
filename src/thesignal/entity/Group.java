@@ -11,11 +11,11 @@ public class Group extends DHTEntity {
 	public final Integer index;
 	private String name;
 	private TreeSet<User> members = new TreeSet<User>();
-	private TreeSet<TSMessage> messages = new TreeSet<TSMessage>();
+	private TreeSet<Message> messages = new TreeSet<Message>();
 
 	private boolean immutable;
 	
-	public Group(int index_, String name_, Collection<User> members_, Collection<TSMessage> messages_, Number160 hash) {
+	public Group(int index_, String name_, Collection<User> members_, Collection<Message> messages_, Number160 hash) {
 		super(hash);
 		index = index_;
 		name = name_;
@@ -32,7 +32,7 @@ public class Group extends DHTEntity {
 		members.addAll(members_);
 	}
 	
-	public void addMessage(TSMessage message) throws OperationNotSupportedException
+	public void addMessage(Message message) throws OperationNotSupportedException
 	{
 		checkMutability();
 		messages.add(message);

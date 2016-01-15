@@ -2,155 +2,133 @@ package thesignal;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.util.ArrayList;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Date;
+import java.util.Random;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+
+import net.tomp2p.peers.Number160;
+
+import thesignal.bus.events.MessageReceived;
+<<<<<<< Updated upstream
+import thesignal.entity.TSDHTToUILink;
+=======
+import thesignal.bus.Bus;
+import thesignal.bus.RegisterException;
+import thesignal.bus.commands.AcknowledgeMessage;
+import thesignal.entity.DHTMessage;
+import thesignal.entity.BusUiAdapter;
+>>>>>>> Stashed changes
+import thesignal.entity.TSGroup;
+import thesignal.entity.TSPeer;
+import thesignal.entity.TSMessage;
+import thesignal.ui.TSBaseList;
+import thesignal.ui.TSGroupUI;
+import thesignal.ui.TSGroupsListModel;
+import thesignal.ui.TSMessageCellRenderer;
+import thesignal.ui.TSMessageListModel;
+
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.naming.OperationNotSupportedException;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-
-import net.tomp2p.peers.Number160;
-import thesignal.bus.events.Connected;
-import thesignal.bus.events.Started;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
-import thesignal.dht.usecase.ConnectToDHT;
-import thesignal.dht.usecase.ReadGroupsFromDHT;
-import thesignal.dht.usecase.SendMessageToDHT;
-import thesignal.dht.usecase.SetupMessageReceiving;
-import thesignal.entity.BusUiAdapter;
-import thesignal.entity.DHTEntity;
-import thesignal.entity.DHTUser;
-import thesignal.entity.Group;
-import thesignal.entity.Message;
-import thesignal.entity.User;
-import thesignal.manager.GroupManager;
-import thesignal.manager.MeManager;
-import thesignal.repository.PeerRepository;
-import thesignal.ui.StatusUI;
-import thesignal.ui.TSGroupUI;
-import thesignal.ui.TSMessagesUI;
-import thesignal.ui.TSTextInputUI;
-import thesignal.utils.Util;
-
 public class TheSignal extends JFrame {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2995079921468810238L;
-
 	// assumes the current class is called logger
 	private final static Logger logger = Logger.getLogger("thesignal");
 
+	private JTextField mMessageInput;
+	private TSMessageListModel messagesListModel;
+	private JList messagesList;
 	private TSGroupUI groupsUI;
-	private TSMessagesUI messagesUI;
-	private TSTextInputUI messageInputUI;
 
-	private TSBus tsBus;
-	private Injector injector;
+	private BusUiAdapter link;
 
-	public TheSignal(String ownName) {
+	private class MessageSendListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			String text = mMessageInput.getText().trim();
+			if (!text.isEmpty()) {
+				// Just for testing create a dummy event and let it get
+				// handled...
+				MessageReceived dummyEvent = new MessageReceived();
+				Date date = new Date();
+				TSPeer sender = new TSPeer("Todo");
+				TSGroup receiver = new TSGroup("Todo", Arrays.asList(sender));
+				int secondDiff = new Random(date.getTime()).nextInt(121) - 60;
+				dummyEvent.message = new TSMessage(date.toString()
+						+ (secondDiff < 0 ? " - " : " + ")
+						+ Math.abs(secondDiff) + ": " + text, sender, receiver,
+						new Date(date.getTime() + secondDiff * 1000));
+				messagesListModel.handleEvent(dummyEvent);
+
+				messagesList.ensureIndexIsVisible(messagesList
+					.getModel()
+					.getSize() - 1);
+			}
+
+			mMessageInput.setText(null);
+			mMessageInput.requestFocusInWindow();
+		}
+	}
+
+	public TheSignal(String ownName, Number160 ownHash) {
 		logger.setLevel(Level.CONFIG);
+		ConsoleHandler consoleHandler = new ConsoleHandler();
+		consoleHandler.setLevel(Level.ALL);
+		logger.addHandler(consoleHandler);
 
 		setTitle("TheSignal Messenger");
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-		injector = Guice.createInjector();
-
-		tsBus = injector.getInstance(TSBus.class);
-		tsBus.setup(
-			injector.getInstance(ConnectToDHT.class),
-			injector.getInstance(SendMessageToDHT.class),
-			injector.getInstance(ReadGroupsFromDHT.class),
-			injector.getInstance(SetupMessageReceiving.class),
-			injector.getInstance(BusUiAdapter.class),
-			injector.getInstance(TSMessagesUI.class),
-			injector.getInstance(TSGroupUI.class),
-			injector.getInstance(TSTextInputUI.class),
-			injector.getInstance(StatusUI.class));
-
-		{
-			// Add the Born and Mehrtürer users and the given one.
-			PeerRepository peerRepository = injector
-				.getInstance(PeerRepository.class);
-			MeManager meManager = injector.getInstance(MeManager.class);
-			User born = new User("born", Number160.createHash("born"));
-			User mehr = new User("mehrtürer", Number160.createHash("mehrtürer"));
-
-			meManager.user = new User(ownName, Number160.createHash(ownName));
-
-			try {
-				peerRepository.addPeerHash(
-					meManager.user,
-					Number160.createHash(meManager.user.name));
-				peerRepository.addPeerHash(
-					born,
-					Number160.createHash(born.name));
-				peerRepository.addPeerHash(
-					mehr,
-					Number160.createHash(mehr.name));
-			} catch (OperationNotSupportedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			// Just for debugging purposes... Generate a random group.
-			GroupManager groupManager = injector
-				.getInstance(GroupManager.class);
-			Group group = groupManager.addGroup(
-				"DemoGroup",
-				Arrays.asList(meManager.user, mehr, born),
-				new ArrayList<Message>(),
-				Number160.createHash("Demo Group"));
-			group.dhtEntity = new Group(group.index, group.name(),
-					new ArrayList<User>(), Util.randNumber160());
-		}
-
-		// TODO move the following lines to a use case
 		JComponent newContentPane = new JPanel(new BorderLayout());
 
-		JPanel messagesContainer = new JPanel(new BorderLayout());
 		JTextField messageInputField = initializeTextInput();
 		JScrollPane messagesListScrollPane = initializeMessagesList();
 		JScrollPane groupsListScrollPane = initializeGroupsList();
-		JLabel statusLabel = injector.getInstance(StatusUI.class).getStatusLabel();
 
-		messagesContainer.add(messagesListScrollPane, BorderLayout.CENTER);
-		messagesContainer.add(messageInputField, BorderLayout.SOUTH);
-		newContentPane.add(messagesContainer, BorderLayout.CENTER);
+		newContentPane.add(messagesListScrollPane, BorderLayout.CENTER);
+		newContentPane.add(messageInputField, BorderLayout.PAGE_END);
 		newContentPane.add(groupsListScrollPane, BorderLayout.EAST);
-		newContentPane.add(statusLabel, BorderLayout.PAGE_END);
 
 		setContentPane(newContentPane);
 
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
 
-		tsBus.raise(new Started());
+		link = new BusUiAdapter();
 	}
 
 	private JTextField initializeTextInput() {
-		messageInputUI = injector.getInstance(TSTextInputUI.class);
-		return messageInputUI.getTextInputField();
+		mMessageInput = new JTextField();
+		mMessageInput.addActionListener(new MessageSendListener());
+
+		return mMessageInput;
 	}
 
 	private JScrollPane initializeMessagesList() {
-		messagesUI = injector.getInstance(TSMessagesUI.class);
-		return messagesUI.getMessagesScrollPane();
+		messagesListModel = new TSMessageListModel();
+		messagesList = new TSBaseList(messagesListModel);
+		JScrollPane listScrollPane = new JScrollPane(messagesList);
+		messagesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		messagesList.setVisibleRowCount(5);
+
+		messagesList.setCellRenderer(new TSMessageCellRenderer());
+
+		return listScrollPane;
 	}
 
 	private JScrollPane initializeGroupsList() {
-		groupsUI = injector.getInstance(TSGroupUI.class);
+		groupsUI = new TSGroupUI();
 		return groupsUI.getGroupsScrollPane();
 	}
 
@@ -158,7 +136,8 @@ public class TheSignal extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				TheSignal ex = new TheSignal(args[0]);
+				TheSignal ex = new TheSignal(args[0], Number160
+					.createHash(args[0]));
 				ex.setVisible(true);
 			}
 		});

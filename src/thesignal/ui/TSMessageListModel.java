@@ -9,23 +9,23 @@ import javax.swing.ListModel;
 
 import thesignal.bus.events.MessageReceived;
 import thesignal.entity.Group;
-import thesignal.entity.TSMessage;
+import thesignal.entity.Message;
 
-public class TSMessageListModel extends AbstractListModel implements ListModel, Comparator<TSMessage> {
+public class TSMessageListModel extends AbstractListModel implements ListModel, Comparator<Message> {
 	private static final long serialVersionUID = 8373407531972086754L;
 
 	private Group group;
-	private ArrayList<TSMessage> m_Messages = new ArrayList<TSMessage>();
+	private ArrayList<Message> m_Messages = new ArrayList<Message>();
 	
 	@Override
-	public TSMessage getElementAt(int arg0) {
+	public Message getElementAt(int arg0) {
 		return m_Messages.get(arg0);
 	}
 
 	public void handleEvent(MessageReceived event)
 	{
-		TSMessage newMessage = event.message;
-		int newMessageIndex = -1 * (Arrays.binarySearch(m_Messages.toArray(new TSMessage[m_Messages.size()]), newMessage, (Comparator<TSMessage>)this) + 1);
+		Message newMessage = event.message;
+		int newMessageIndex = -1 * (Arrays.binarySearch(m_Messages.toArray(new Message[m_Messages.size()]), newMessage, (Comparator<Message>)this) + 1);
 		while(newMessageIndex < m_Messages.size() && m_Messages.get(newMessageIndex).getTimestamp().compareTo(newMessage.getTimestamp()) == 0)
 		{
 			newMessageIndex++;
@@ -40,7 +40,7 @@ public class TSMessageListModel extends AbstractListModel implements ListModel, 
 	}
 
 	@Override
-	public int compare(TSMessage arg0, TSMessage arg1) {
+	public int compare(Message arg0, Message arg1) {
 		return arg0.getTimestamp().compareTo(arg1.getTimestamp());
 	}
 }

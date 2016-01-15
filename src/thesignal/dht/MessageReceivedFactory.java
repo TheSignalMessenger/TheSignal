@@ -10,9 +10,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import thesignal.bus.events.MessageReceived;
-import thesignal.entity.DHTMessage;
 import thesignal.entity.Group;
-import thesignal.entity.TSMessage;
+import thesignal.entity.Message;
 import thesignal.entity.User;
 import thesignal.manager.UserManager;
 import thesignal.repository.UserRepository;
@@ -29,7 +28,7 @@ public class MessageReceivedFactory {
 
 	public MessageReceived createFromDHT(Data data, Group receiver) {
 		MessageReceived messageReceived = new MessageReceived();
-		messageReceived.message = new TSMessage(getMessagePayload(data),
+		messageReceived.message = new Message(getMessagePayload(data),
 				getSender(data), receiver, getDate(data));
 
 		return messageReceived;
@@ -39,10 +38,10 @@ public class MessageReceivedFactory {
 		String content = "";
 		Object dataObject = null;
 		try {
-			DHTMessage msg;
+			Message msg;
 			dataObject = data.getObject();
-			msg = (DHTMessage) dataObject;
-			content = msg.payload;
+			msg = (Message) dataObject;
+			content = msg.getPayload();
 		} catch (ClassNotFoundException e1) {
 			// e1.printStackTrace();
 		} catch (IOException e1) {
@@ -58,8 +57,8 @@ public class MessageReceivedFactory {
 	private Date getDate(Data data) {
 		long createdMS = data.getCreated();
 		try {
-			DHTMessage msg = (DHTMessage) data.getObject();
-			createdMS = msg.createdDateTime;
+			Message msg = (Message) data.getObject();
+			createdMS = msg.getTimestamp().getTime();
 		} catch (ClassNotFoundException e) {
 			// e.printStackTrace();
 		} catch (IOException e) {
@@ -72,9 +71,9 @@ public class MessageReceivedFactory {
 
 	private User getSender(Data data) {
 		try {
-			DHTMessage msg = (DHTMessage) data.getObject();
+			Message msg = (Message) data.getObject();
 
-			return userRepository.getUser(msg.sender);
+			return msg.getSender();
 		} catch (ClassNotFoundException e) {
 			// e.printStackTrace();
 		} catch (IOException e) {

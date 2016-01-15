@@ -1,13 +1,13 @@
 package thesignal.bus.events;
 
 import thesignal.bus.Event;
-import thesignal.entity.TSMessage;
+import thesignal.entity.Message;
 
 public class SendingMessageFailed implements Event {
-	public TSMessage message;
+	public Message message;
 	public String reason;
 
-	public SendingMessageFailed(TSMessage message, String reason) {
+	public SendingMessageFailed(Message message, String reason) {
 		this.message = message;
 		this.reason = reason;
 	}

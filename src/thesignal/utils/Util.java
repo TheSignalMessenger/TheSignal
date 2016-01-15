@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
-import thesignal.entity.DHTMessage;
+import thesignal.entity.Message;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.storage.Data;
 
@@ -97,10 +97,10 @@ public final class Util {
 		String message = "";
 		Object dataObject = null;
 		try {
-			DHTMessage msg;
+			Message msg;
 			dataObject = data.getObject();
-			msg = (DHTMessage) dataObject;
-			message = msg.payload;
+			msg = (Message) dataObject;
+			message = msg.getPayload();
 		} catch (ClassNotFoundException e1) {
 			// e1.printStackTrace();
 		} catch (IOException e1) {
