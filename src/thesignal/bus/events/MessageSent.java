@@ -1,12 +1,12 @@
 package thesignal.bus.events;
 
 import thesignal.bus.Event;
-import thesignal.entity.TSMessage;
+import thesignal.entity.Message;
 
 public class MessageSent implements Event {
-	public TSMessage message;
+	public Message message;
 
-	public MessageSent(TSMessage message) {
+	public MessageSent(Message message) {
 		this.message = message;
 	}
 }

@@ -2,7 +2,7 @@ package thesignal.entity;
 
 import java.util.Date;
 
-public class TSMessage {
+public class Message {
 	public enum State {
 		None,
 		Unread,
@@ -19,7 +19,7 @@ public class TSMessage {
 	private Group recipient;
 	public State state;
 
-	public TSMessage(String payload, User sender, Group recipient,
+	public Message(String payload, User sender, Group recipient,
 			Date timestamp) {
 		this.payload = payload;
 		this.sender = sender;

@@ -1,8 +1,8 @@
 package thesignal.bus.events;
 
 import thesignal.bus.Event;
-import thesignal.entity.TSMessage;
+import thesignal.entity.Message;
 
 public class MessageAcknowledged implements Event {
-	public TSMessage message;
+	public Message message;
 }

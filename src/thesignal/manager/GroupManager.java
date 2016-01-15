@@ -9,7 +9,7 @@ import net.tomp2p.peers.Number160;
 import com.google.inject.Singleton;
 
 import thesignal.entity.Group;
-import thesignal.entity.TSMessage;
+import thesignal.entity.Message;
 import thesignal.entity.User;
 
 @Singleton
@@ -21,7 +21,7 @@ public class GroupManager {
 	}
 
 	public Group addGroup(String name_, Collection<User> members_,
-			Collection<TSMessage> messages_, Number160 _hash) {
+			Collection<Message> messages_, Number160 _hash) {
 		Group group = new Group(groups.size(), name_, members_, messages_, _hash);
 		groups.add(group);
 		return group;

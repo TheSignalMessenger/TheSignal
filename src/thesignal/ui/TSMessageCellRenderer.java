@@ -7,7 +7,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
 
-import thesignal.entity.TSMessage;
+import thesignal.entity.Message;
 import thesignal.utils.Util;
 
 public class TSMessageCellRenderer extends DefaultListCellRenderer {
@@ -24,7 +24,7 @@ public class TSMessageCellRenderer extends DefaultListCellRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value,
 			int index, boolean isSelected, boolean cellHasFocus) {
-		TSMessage message = (TSMessage) value;
+		Message message = (Message) value;
 		JLabel component = new JLabel(message.getTimestamp().toString() + ": " + message.getPayload());
 		component.setOpaque(true);
 		if(isSelected)
@@ -37,19 +37,19 @@ public class TSMessageCellRenderer extends DefaultListCellRenderer {
 			component.setBackground(list.getBackground());
 			component.setForeground(list.getForeground());
 		}
-		if(message.state.equals(TSMessage.State.Sending))
+		if(message.state.equals(Message.State.Sending))
 		{
 			component.setForeground(Util.mix(component.getForeground(), ColorSending));
 		}
-		else if(message.state.equals(TSMessage.State.SendFailed))
+		else if(message.state.equals(Message.State.SendFailed))
 		{
 			component.setForeground(Util.mix(component.getForeground(), ColorSendFailed));
 		}
-		else if(message.state.equals(TSMessage.State.SendOK))
+		else if(message.state.equals(Message.State.SendOK))
 		{
 			component.setForeground(Util.mix(component.getForeground(), ColorSendOK));
 		}
-		else if(message.state.equals(TSMessage.State.SendAcknowledged))
+		else if(message.state.equals(Message.State.SendAcknowledged))
 		{
 			component.setForeground(Util.mix(component.getForeground(), ColorSendAck));
 		}

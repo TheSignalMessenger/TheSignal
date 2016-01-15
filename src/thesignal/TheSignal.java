@@ -32,7 +32,7 @@ import thesignal.entity.BusUiAdapter;
 import thesignal.entity.DHTEntity;
 import thesignal.entity.DHTUser;
 import thesignal.entity.Group;
-import thesignal.entity.TSMessage;
+import thesignal.entity.Message;
 import thesignal.entity.User;
 import thesignal.manager.GroupManager;
 import thesignal.manager.MeManager;
@@ -111,7 +111,7 @@ public class TheSignal extends JFrame {
 			Group group = groupManager.addGroup(
 				"DemoGroup",
 				Arrays.asList(meManager.user, mehr, born),
-				new ArrayList<TSMessage>(),
+				new ArrayList<Message>(),
 				Number160.createHash("Demo Group"));
 			group.dhtEntity = new Group(group.index, group.name(),
 					new ArrayList<User>(), Util.randNumber160());

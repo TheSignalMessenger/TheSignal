@@ -19,7 +19,7 @@ import thesignal.bus.commands.SendMessage;
 import thesignal.bus.events.Connected;
 import thesignal.bus.events.MessageReceived;
 import thesignal.entity.Group;
-import thesignal.entity.TSMessage;
+import thesignal.entity.Message;
 import thesignal.entity.User;
 import thesignal.manager.MeManager;
 import thesignal.repository.GroupRepository;
@@ -51,11 +51,11 @@ public class TSTextInputUI implements EventListener<Event> {
 				User sender = meManager.user;
 				Group receiver = groupRepository.getSelectedGroup();
 				int secondDiff = new Random(date.getTime()).nextInt(121) - 60;
-				TSMessage message = new TSMessage(date.toString()
+				Message message = new Message(date.toString()
 						+ (secondDiff < 0 ? " - " : " + ")
 						+ Math.abs(secondDiff) + ": " + text, sender, receiver,
 						new Date(date.getTime() + secondDiff * 1000));
-				message.state = TSMessage.State.Sending;
+				message.state = Message.State.Sending;
 
 				SendMessage command = new SendMessage(message);
 

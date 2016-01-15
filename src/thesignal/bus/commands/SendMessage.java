@@ -1,12 +1,12 @@
 package thesignal.bus.commands;
 
 import thesignal.bus.Command;
-import thesignal.entity.TSMessage;
+import thesignal.entity.Message;
 
 public class SendMessage implements Command {
-	public final TSMessage message;
+	public final Message message;
 	
-	public SendMessage(TSMessage message_) {
+	public SendMessage(Message message_) {
 		message = message_;
 	}
 }

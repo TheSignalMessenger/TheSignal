@@ -15,7 +15,7 @@ import thesignal.bus.commands.SendMessage;
 import thesignal.bus.events.MessageSent;
 import thesignal.bus.events.SendingMessageFailed;
 import thesignal.dht.ContentKeyFactory;
-import thesignal.entity.DHTMessage;
+import thesignal.entity.Message;
 import thesignal.manager.MeManager;
 import thesignal.repository.PeerRepository;
 
@@ -40,7 +40,7 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 				command.message.getReceiver().dhtEntity.hash,
 				peerRepository.findOne(command.message.getSender()),
 				contentKeyFactory.create(),
-				command.message.getPayload());
+				command.message);
 			if (!storeOperation.isSuccess()) {
 				bus.raise(new SendingMessageFailed(command.message,
 						"putDHT not successfull"));
@@ -56,13 +56,10 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 	}
 
 	private FutureDHT store(Number160 location, Number160 domain,
-			Number160 contentKey, String value) throws IOException {
-		DHTMessage msg = new DHTMessage();
-		msg.createdDateTime = new Date().getTime();
-		msg.payload = value;
+			Number160 contentKey, Message value) throws IOException {
 		return meManager.peer
 			.put(location)
-			.setData(contentKey, new Data(msg))
+			.setData(contentKey, new Data(value))
 			.setDomainKey(domain)
 			.start()
 			.awaitUninterruptibly();
