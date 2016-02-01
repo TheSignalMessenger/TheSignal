@@ -1,5 +1,6 @@
 package thesignal.entity;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.TreeSet;
 
@@ -7,7 +8,11 @@ import javax.naming.OperationNotSupportedException;
 
 import net.tomp2p.peers.Number160;
 
-public class Group extends DHTEntity {
+public class Group extends DHTEntity implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4866451062114781263L;
 	public final Integer index;
 	private String name;
 	private TreeSet<User> members = new TreeSet<User>();
