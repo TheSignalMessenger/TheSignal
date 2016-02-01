@@ -37,7 +37,7 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 	public void handle(SendMessage command, Bus bus) {
 		try {
 			FutureDHT storeOperation = store(
-				command.message.getReceiver().dhtEntity.hash,
+				command.message.getReceiver().hash,
 				command.message.getSender().hash,
 				contentKeyFactory.create(),
 				command.message);

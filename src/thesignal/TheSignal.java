@@ -109,13 +109,11 @@ public class TheSignal extends JFrame {
 			// Just for debugging purposes... Generate a random group.
 			GroupManager groupManager = injector
 				.getInstance(GroupManager.class);
-			Group group = groupManager.addGroup(
+			groupManager.addGroup(
 				"DemoGroup",
 				Arrays.asList(meManager.user, mehr, born),
 				new ArrayList<Message>(),
 				Number160.createHash("Demo Group"));
-			group.dhtEntity = new Group(group.index, group.name(),
-					new ArrayList<User>(), Util.randNumber160());
 		}
 
 		// TODO move the following lines to a use case

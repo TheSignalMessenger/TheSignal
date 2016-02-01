@@ -17,7 +17,7 @@ public class Group extends DHTEntity implements Serializable {
 	private String name;
 	private TreeSet<User> members = new TreeSet<User>();
 	private TreeSet<Message> messages = new TreeSet<Message>();
-
+	
 	private boolean immutable;
 	
 	public Group(int index_, String name_, Collection<User> members_, Collection<Message> messages_, Number160 hash) {
@@ -66,6 +66,4 @@ public class Group extends DHTEntity implements Serializable {
 	{
 		return members.contains(peer);
 	}
-	
-	public DHTEntity dhtEntity;
 }
