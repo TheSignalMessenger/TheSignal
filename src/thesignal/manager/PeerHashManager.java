@@ -9,6 +9,8 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class PeerHashManager {
+	// I feel like this class is useless. We're basically mapping Number160s onto themselves... 
+	
 	private HashMap<DHTEntity, Number160> m_peer2Hash = new HashMap<DHTEntity, Number160>();
 	private HashMap<Number160, DHTEntity> m_hash2peer = new HashMap<Number160, DHTEntity>();
 
