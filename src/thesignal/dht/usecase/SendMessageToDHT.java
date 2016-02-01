@@ -56,10 +56,10 @@ public class SendMessageToDHT implements CommandHandler<SendMessage> {
 	}
 
 	private FutureDHT store(Number160 location, Number160 domain,
-			Number160 contentKey, Message value) throws IOException {
+			Number160 contentKey, Message message) throws IOException {
 		return meManager.peer
 			.put(location)
-			.setData(contentKey, new Data(value))
+			.setData(contentKey, new Data(message.getPayload()))
 			.setDomainKey(domain)
 			.start()
 			.awaitUninterruptibly();
