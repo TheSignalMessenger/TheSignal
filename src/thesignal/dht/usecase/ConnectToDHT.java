@@ -51,11 +51,11 @@ public class ConnectToDHT implements EventListener<Event> {
 					// correctly initialized (i.e. == null)...
 					try {
 						// TODO get/generate the Hash the correct way...
-						Number160 hash = Number160.createHash("foobar");
-						meManager.peer = new PeerMaker(hash)
+						User me = meManager.user;
+						meManager.peer = new PeerMaker(me.hash)
 							.setPorts(port)
 							.makeAndListen();
-						peerHashManager.put(meManager.user, hash);
+						peerHashManager.put(meManager.user, meManager.user.hash);
 					} catch (IOException e) {
 						// TODO do something smart in case of Exception
 						e.printStackTrace();
