@@ -6,7 +6,7 @@ import thesignal.TheSignal;
 import thesignal.entity.User;
 
 public class Preferences {
-	private static java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(TheSignal.class);;
+	private static java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(TheSignal.class);
 
 	public static final String MeUserName = "ME_USERNAME";
 	public static final String MeHash = "ME_HASH";
