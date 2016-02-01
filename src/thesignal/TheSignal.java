@@ -36,6 +36,7 @@ import thesignal.entity.Message;
 import thesignal.entity.User;
 import thesignal.manager.GroupManager;
 import thesignal.manager.MeManager;
+import thesignal.manager.Preferences;
 import thesignal.repository.PeerRepository;
 import thesignal.ui.StatusUI;
 import thesignal.ui.TSGroupUI;
@@ -66,6 +67,13 @@ public class TheSignal extends JFrame {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
+		User me = Preferences.getMe();
+		if(me.hash == null || !me.name.equals(ownName))
+		{
+			me = new User(ownName, Number160.createHash(ownName));
+			Preferences.putMe(me);
+		}
+		
 		injector = Guice.createInjector();
 
 		tsBus = injector.getInstance(TSBus.class);
