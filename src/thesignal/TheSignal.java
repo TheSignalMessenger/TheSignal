@@ -92,26 +92,19 @@ public class TheSignal extends JFrame {
 			// Add the Born and Mehrtürer users and the given one.
 			PeerRepository peerRepository = injector
 				.getInstance(PeerRepository.class);
-			MeManager meManager = injector.getInstance(MeManager.class);
 			User born = new User("born", Number160.createHash("born"));
 			User mehr = new User("mehrtürer", Number160.createHash("mehrtürer"));
 
-			meManager.user = new User(ownName, Number160.createHash(ownName));
-
 			try {
-				peerRepository.addPeerHash(
-					meManager.user,
-					Number160.createHash(meManager.user.name));
-				peerRepository.addPeerHash(
-					born,
-					Number160.createHash(born.name));
-				peerRepository.addPeerHash(
-					mehr,
-					Number160.createHash(mehr.name));
+				peerRepository.addPeer(me);
+				peerRepository.addPeer(born);
+				peerRepository.addPeer(mehr);
 			} catch (OperationNotSupportedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+			MeManager meManager = injector.getInstance(MeManager.class);
 
 			// Just for debugging purposes... Generate a random group.
 			GroupManager groupManager = injector
