@@ -34,5 +34,4 @@ public class StatusUI implements EventListener<Event> {
 			mStatusLabel.setText("Connected");
 		}
 	}
-
 }
