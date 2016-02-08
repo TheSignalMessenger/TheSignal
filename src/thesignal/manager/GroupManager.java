@@ -3,6 +3,7 @@ package thesignal.manager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import net.tomp2p.peers.Number160;
 import thesignal.entity.Group;
@@ -20,8 +21,9 @@ public class GroupManager {
 	}
 
 	public Group addGroup(String name_, Collection<User> members_,
-			Collection<Message> messages_, Number160 _hash) {
-		Group group = new Group(groups.size(), name_, members_, messages_, _hash);
+			Map<Number160, Message> messages_, Number160 _hash) {
+		Group group = new Group(groups.size(), name_, members_, messages_,
+				_hash);
 		groups.add(group);
 		return group;
 	}
@@ -34,8 +36,7 @@ public class GroupManager {
 		}
 	}
 
-	public int getNumGroups()
-	{
+	public int getNumGroups() {
 		return groups.size();
 	}
 }

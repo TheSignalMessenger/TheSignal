@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +34,7 @@ import thesignal.ui.StatusUI;
 import thesignal.ui.TSGroupUI;
 import thesignal.ui.TSMessagesUI;
 import thesignal.ui.TSTextInputUI;
+import thesignal.utils.Pair;
 import thesignal.utils.Util;
 
 import com.google.inject.Guice;
@@ -62,12 +64,11 @@ public class TheSignal extends JFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		User me = Preferences.getMe();
-		if(me.hash == null || !me.name.equals(ownName))
-		{
+		if (me.hash == null || !me.name.equals(ownName)) {
 			me = new User(ownName, Number160.createHash(ownName));
 			Preferences.putMe(me);
 		}
-		
+
 		injector = Guice.createInjector();
 
 		tsBus = injector.getInstance(TSBus.class);
@@ -106,7 +107,7 @@ public class TheSignal extends JFrame {
 			groupManager.addGroup(
 				"DemoGroup",
 				Arrays.asList(meManager.user, mehr, born),
-				new ArrayList<Message>(),
+				new HashMap<Number160, Message>(),
 				Number160.createHash("Demo Group"));
 		}
 
@@ -117,7 +118,9 @@ public class TheSignal extends JFrame {
 		JTextField messageInputField = initializeTextInput();
 		JScrollPane messagesListScrollPane = initializeMessagesList();
 		JScrollPane groupsListScrollPane = initializeGroupsList();
-		JLabel statusLabel = injector.getInstance(StatusUI.class).getStatusLabel();
+		JLabel statusLabel = injector
+			.getInstance(StatusUI.class)
+			.getStatusLabel();
 
 		messagesContainer.add(messagesListScrollPane, BorderLayout.CENTER);
 		messagesContainer.add(messageInputField, BorderLayout.SOUTH);

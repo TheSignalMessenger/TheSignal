@@ -1,61 +1,70 @@
 package thesignal.dht.usecase;
 
+import java.util.Date;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import net.tomp2p.futures.FutureDHT;
+import net.tomp2p.peers.Number160;
+import net.tomp2p.storage.Data;
 import thesignal.bus.Bus;
 import thesignal.bus.EventListener;
+import thesignal.bus.commands.ReceiveNewMessage;
 import thesignal.bus.events.Connected;
-import thesignal.dht.MessageReceivedFactory;
 import thesignal.entity.Group;
+import thesignal.entity.Message;
+import thesignal.entity.User;
 import thesignal.manager.MeManager;
 import thesignal.repository.GroupRepository;
-import thesignal.repository.KnownPeersRepository;
-import thesignal.repository.PeerHashRepository;
 
 import com.google.inject.Inject;
 
 public class SetupMessageReceiving implements EventListener<Connected> {
 
 	private MeManager meManager;
-	private KnownPeersRepository knownPeersRepository;
-	private MessageReceivedFactory messageReceivedFactory;
 	private GroupRepository groupRepository;
-	private PeerHashRepository peerHashRepository;
 
 	@Inject
 	public SetupMessageReceiving(Bus bus, MeManager meManager,
-			KnownPeersRepository knownPeersRepository,
-			GroupRepository groupRepository,
-			MessageReceivedFactory messageReceivedFactory,
-			PeerHashRepository peerHashRepository) {
+			GroupRepository groupRepository) {
 		this.meManager = meManager;
-		this.knownPeersRepository = knownPeersRepository;
 		this.groupRepository = groupRepository;
-		this.messageReceivedFactory = messageReceivedFactory;
-		this.peerHashRepository = peerHashRepository;
 	}
 
 	@Override
-	public void handle(Connected event, Bus bus) {
+	public void handle(Connected event, final Bus bus) {
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				for (Group group : groupRepository.findAll()) {
+					for (User sender : group.getMembers()) {
+						FutureDHT futureDHT = meManager.peer
+							.get(group.hash)
+							.setDomainKey(sender.hash)
+							.setAll(true)
+							.start();
+						futureDHT.awaitUninterruptibly();
+						Map<Number160, Data> newData = null;
+						if (futureDHT.isSuccess()) {
+							newData = futureDHT.getDataMap();
+							for (Number160 contentKey : group
+								.getMessageHashes()) {
+								newData.remove(contentKey);
+							}
+						}
 
-					// TODO getPeer
-					/*
-					 * FutureDHT futureDHT = meProvider .getPeer()
-					 * .get(meProvider.get().peerHash)
-					 * .setDomainKey(contact.peerHash) .setAll(true) .start();
-					 * futureDHT.awaitUninterruptibly(); Map<Number160, Data>
-					 * newData = null; if (futureDHT.isSuccess()) { newData =
-					 * futureDHT.getDataMap(); for (Number160 contentKey :
-					 * contact.receivedData.keySet()) {
-					 * newData.remove(contentKey); } } return newData;
-					 */
-
+						for (Map.Entry<Number160, Data> entry : newData
+							.entrySet()) {
+							ReceiveNewMessage command = new ReceiveNewMessage();
+							command.hash = entry.getKey();
+							command.message = new Message(entry
+								.getValue()
+								.toString(), sender, group, new Date());
+							bus.handle(command);
+						}
+					}
 				}
 
 				/*
@@ -80,6 +89,8 @@ public class SetupMessageReceiving implements EventListener<Connected> {
 				 * you.addNewPutData(newPutData); } }
 				 */
 			}
-		}, 0, 1000);
+		},
+			0,
+			1000);
 	}
 }
