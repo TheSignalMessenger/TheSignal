@@ -30,10 +30,10 @@ import thesignal.manager.GroupManager;
 import thesignal.manager.MeManager;
 import thesignal.manager.Preferences;
 import thesignal.repository.PeerRepository;
-import thesignal.ui.StatusUI;
-import thesignal.ui.TSGroupUI;
-import thesignal.ui.TSMessagesUI;
-import thesignal.ui.TSTextInputUI;
+import thesignal.ui.singlegroup.StatusUI;
+import thesignal.ui.singlegroup.TSGroupUI;
+import thesignal.ui.singlegroup.TSMessagesUI;
+import thesignal.ui.singlegroup.TSTextInputUI;
 import thesignal.utils.Pair;
 import thesignal.utils.Util;
 
@@ -72,23 +72,23 @@ public class TheSignal extends JFrame {
 		injector = Guice.createInjector();
 
 		tsBus = injector.getInstance(TSBus.class);
-		tsBus.setup(
-			injector.getInstance(ConnectToDHT.class),
-			injector.getInstance(SendMessageToDHT.class),
-			injector.getInstance(ReadGroupsFromDHT.class),
-			injector.getInstance(SetupMessageReceiving.class),
-			injector.getInstance(BusUiAdapter.class),
-			injector.getInstance(TSMessagesUI.class),
-			injector.getInstance(TSGroupUI.class),
-			injector.getInstance(TSTextInputUI.class),
-			injector.getInstance(StatusUI.class));
+		tsBus.setup(injector.getInstance(ConnectToDHT.class),
+				injector.getInstance(SendMessageToDHT.class),
+				injector.getInstance(ReadGroupsFromDHT.class),
+				injector.getInstance(SetupMessageReceiving.class),
+				injector.getInstance(BusUiAdapter.class),
+				injector.getInstance(TSMessagesUI.class),
+				injector.getInstance(TSGroupUI.class),
+				injector.getInstance(TSTextInputUI.class),
+				injector.getInstance(StatusUI.class));
 
 		{
-			// Add the Born and Mehrtürer users and the given one.
+			// Add the Born and Mehrt�rer users and the given one.
 			PeerRepository peerRepository = injector
-				.getInstance(PeerRepository.class);
+					.getInstance(PeerRepository.class);
 			User born = new User("born", Number160.createHash("born"));
-			User mehr = new User("mehrtürer", Number160.createHash("mehrtürer"));
+			User mehr = new User("mehrtürer",
+					Number160.createHash("mehrtürer"));
 
 			try {
 				peerRepository.addPeer(me);
@@ -103,12 +103,11 @@ public class TheSignal extends JFrame {
 
 			// Just for debugging purposes... Generate a random group.
 			GroupManager groupManager = injector
-				.getInstance(GroupManager.class);
-			groupManager.addGroup(
-				"DemoGroup",
-				Arrays.asList(meManager.user, mehr, born),
-				new HashMap<Number160, Message>(),
-				Number160.createHash("Demo Group"));
+					.getInstance(GroupManager.class);
+			groupManager.addGroup("DemoGroup",
+					Arrays.asList(meManager.user, mehr, born),
+					new HashMap<Number160, Message>(),
+					Number160.createHash("Demo Group"));
 		}
 
 		// TODO move the following lines to a use case
@@ -118,9 +117,8 @@ public class TheSignal extends JFrame {
 		JTextField messageInputField = initializeTextInput();
 		JScrollPane messagesListScrollPane = initializeMessagesList();
 		JScrollPane groupsListScrollPane = initializeGroupsList();
-		JLabel statusLabel = injector
-			.getInstance(StatusUI.class)
-			.getStatusLabel();
+		JLabel statusLabel = injector.getInstance(StatusUI.class)
+				.getStatusLabel();
 
 		messagesContainer.add(messagesListScrollPane, BorderLayout.CENTER);
 		messagesContainer.add(messageInputField, BorderLayout.SOUTH);

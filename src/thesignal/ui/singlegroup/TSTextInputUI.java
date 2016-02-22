@@ -1,4 +1,4 @@
-package thesignal.ui;
+package thesignal.ui.singlegroup;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,14 +25,12 @@ public class TSTextInputUI implements EventListener<Event> {
 	private JTextField mMessageInput;
 	private Bus bus;
 	private MeManager meManager;
-	private GroupRepository groupRepository;
+	public Group activeGroup;
 
 	@Inject
-	public TSTextInputUI(TSBus bus_, MeManager meManager,
-			GroupRepository groupRepository) {
+	public TSTextInputUI(TSBus bus_, MeManager meManager) {
 		bus = bus_;
 		this.meManager = meManager;
-		this.groupRepository = groupRepository;
 
 		mMessageInput = new JTextField();
 		mMessageInput.addActionListener(new MessageSendListener());
@@ -45,12 +43,12 @@ public class TSTextInputUI implements EventListener<Event> {
 			if (!text.isEmpty()) {
 				Date date = new Date();
 				User sender = meManager.user;
-				Group receiver = groupRepository.getSelectedGroup();
 				int secondDiff = new Random(date.getTime()).nextInt(121) - 60;
 				Message message = new Message(date.toString()
 						+ (secondDiff < 0 ? " - " : " + ")
-						+ Math.abs(secondDiff) + ": " + text, sender, receiver,
-						new Date(date.getTime() + secondDiff * 1000));
+						+ Math.abs(secondDiff) + ": " + text, sender,
+						activeGroup, new Date(date.getTime() + secondDiff
+								* 1000));
 				message.state = Message.State.Sending;
 
 				SendMessage command = new SendMessage(message);

@@ -1,4 +1,4 @@
-package thesignal.ui;
+package thesignal.ui.singlegroup;
 
 import java.awt.Component;
 

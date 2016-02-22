@@ -1,4 +1,4 @@
-package thesignal.ui;
+package thesignal.ui.singlegroup;
 
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -12,17 +12,18 @@ import thesignal.bus.events.MessageAcknowledged;
 import thesignal.bus.events.MessageReceived;
 import thesignal.bus.events.MessageSent;
 import thesignal.bus.events.SendingMessageFailed;
+import thesignal.entity.Group;
 
 import com.google.inject.Inject;
 
-public class TSMessagesUI implements EventListener<Event> {
+public class TSMessagesUI {
 
 	private TSMessageListModel messagesListModel;
 	private TSBaseList messagesList;
 	private JScrollPane messagesScrollPane;
-	
+
 	private TSBus bus;
-	
+
 	@Inject
 	public TSMessagesUI(TSBus bus_) {
 		bus = bus_;
@@ -34,34 +35,12 @@ public class TSMessagesUI implements EventListener<Event> {
 
 		messagesList.setCellRenderer(new TSMessageCellRenderer());
 	}
-	
-	public JScrollPane getMessagesScrollPane()
-	{
+
+	public JScrollPane getMessagesScrollPane() {
 		return messagesScrollPane;
 	}
-	
-	@Override
-	public void handle(Event event, Bus bus) {
-		assert(bus == this.bus);
-		if(event instanceof GotMessages)
-		{
-			
-		}
-		else if(event instanceof MessageReceived)
-		{
-			
-		}
-		else if(event instanceof MessageAcknowledged)
-		{
-			
-		}
-		else if(event instanceof MessageSent)
-		{
-			
-		}
-		else if(event instanceof SendingMessageFailed)
-		{
-			
-		}
+
+	public void refresh(Group group) {
+		messagesListModel.refresh(group);
 	}
 }

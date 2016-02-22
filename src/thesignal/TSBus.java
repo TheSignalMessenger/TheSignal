@@ -22,10 +22,10 @@ import thesignal.dht.usecase.ReadGroupsFromDHT;
 import thesignal.dht.usecase.SendMessageToDHT;
 import thesignal.dht.usecase.SetupMessageReceiving;
 import thesignal.entity.BusUiAdapter;
-import thesignal.ui.StatusUI;
-import thesignal.ui.TSGroupUI;
-import thesignal.ui.TSMessagesUI;
-import thesignal.ui.TSTextInputUI;
+import thesignal.ui.singlegroup.StatusUI;
+import thesignal.ui.singlegroup.TSGroupUI;
+import thesignal.ui.singlegroup.TSMessagesUI;
+import thesignal.ui.singlegroup.TSTextInputUI;
 
 import com.google.inject.Singleton;
 

@@ -11,7 +11,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class GroupRepository {
 	GroupManager groupManager;
-	private int selectedGroupIndex = 0;
 	
 	@Inject
 	public GroupRepository(GroupManager groupManager) {
@@ -20,16 +19,6 @@ public class GroupRepository {
 
 	public List<Group> findAll() {
 		return groupManager.findAll();
-	}
-	
-	public void selectGroup(int index)
-	{
-		selectedGroupIndex = index;
-	}
-	
-	public Group getSelectedGroup()
-	{
-		return groupManager.getGroup(selectedGroupIndex);
 	}
 	
 	public int getNumGroups()

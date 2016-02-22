@@ -35,8 +35,7 @@ public class Group extends DHTEntity implements Serializable {
 		members.addAll(members_);
 	}
 
-	public void addMessage(Number160 hash, Message message)
-			throws OperationNotSupportedException {
+	public void addMessage(Number160 hash, Message message) {
 		messages.put(hash, message);
 	}
 
@@ -62,5 +61,9 @@ public class Group extends DHTEntity implements Serializable {
 	
 	public Set<User> getMembers() {
 		return members;
+	}
+	
+	public Collection<Message> getMessages() {
+		return messages.values();
 	}
 }
