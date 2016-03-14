@@ -1,5 +1,7 @@
 package thesignal.ui.usecase;
 
+import com.google.inject.Inject;
+
 import thesignal.bus.Bus;
 import thesignal.bus.EventListener;
 import thesignal.bus.events.MessageReceived;
@@ -9,6 +11,7 @@ public class ReceivedMessageRefreshesGroup implements
 		EventListener<MessageReceived> {
 	UiSingleGroupDisplay uiSingleGroupDisplay;
 
+	@Inject
 	public ReceivedMessageRefreshesGroup(
 			UiSingleGroupDisplay uiSingleGroupDisplay_) {
 		uiSingleGroupDisplay = uiSingleGroupDisplay_;

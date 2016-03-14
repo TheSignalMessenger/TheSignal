@@ -26,6 +26,7 @@ import thesignal.ui.singlegroup.StatusUI;
 import thesignal.ui.singlegroup.TSGroupUI;
 import thesignal.ui.singlegroup.TSMessagesUI;
 import thesignal.ui.singlegroup.TSTextInputUI;
+import thesignal.ui.usecase.ReceivedMessageRefreshesGroup;
 
 import com.google.inject.Singleton;
 
@@ -37,33 +38,34 @@ public class TSBus extends Bus {
 			SendMessageToDHT sendMessageToDHT,
 			ReadGroupsFromDHT readGroupsFromDHT,
 			SetupMessageReceiving setupMessageReceiving,
-			BusUiAdapter busUiAdapter, TSMessagesUI tsMessagesUI,
-			TSGroupUI tsGroupUI, TSTextInputUI tsTextInputUI, StatusUI statusUI) {
+			BusUiAdapter busUiAdapter,
+			ReceivedMessageRefreshesGroup receivedMessageRefreshesGroup,
+			TSMessagesUI tsMessagesUI, TSGroupUI tsGroupUI,
+			TSTextInputUI tsTextInputUI, StatusUI statusUI) {
 		try {
 			register(statusUI, Started.class);
 			register(statusUI, Connected.class);
 
 			register(connectToDHT, Started.class);
 			register(sendMessageToDHT, SendMessage.class);
-			register(readGroupsFromDHT, ReadGroupsFromDHT.class); // Command not yet there
-			register(setupMessageReceiving, SetupMessageReceiving.class); // Command?! not yet there
+			register(readGroupsFromDHT, ReadGroupsFromDHT.class);
+			register(setupMessageReceiving, SetupMessageReceiving.class);
 
 			register(busUiAdapter, GotMessages.class);
 			register(busUiAdapter, MessageReceived.class);
 			register(busUiAdapter, MessageAcknowledged.class);
 			register(busUiAdapter, MessageSent.class);
-			
-			if(tsMessagesUI != null)
-			{
+			register(receivedMessageRefreshesGroup,
+					ReceivedMessageRefreshesGroup.class);
+
+			if (tsMessagesUI != null) {
 				initializeMessagesUI(tsMessagesUI);
 			}
-			if(tsGroupUI != null)
-			{
+			if (tsGroupUI != null) {
 				initializeGroupsUI(tsGroupUI);
 			}
-			if(tsTextInputUI != null)
-			{
-				initializeTextInputUI(tsTextInputUI);	
+			if (tsTextInputUI != null) {
+				initializeTextInputUI(tsTextInputUI);
 			}
 
 			// TestCode...
@@ -80,18 +82,19 @@ public class TSBus extends Bus {
 			logger.severe(e.getMessage());
 		}
 	}
-	
+
 	public void setup(ConnectToDHT connectToDHT,
 			SendMessageToDHT sendMessageToDHT,
 			ReadGroupsFromDHT readGroupsFromDHT,
 			SetupMessageReceiving setupMessageReceiving,
-			BusUiAdapter busUiAdapter)
-	{
-		setup(connectToDHT, sendMessageToDHT, readGroupsFromDHT, setupMessageReceiving, busUiAdapter, null, null, null, null);
+			BusUiAdapter busUiAdapter,
+			ReceivedMessageRefreshesGroup receivedMessageRefreshesGroup) {
+		setup(connectToDHT, sendMessageToDHT, readGroupsFromDHT,
+				setupMessageReceiving, busUiAdapter,
+				receivedMessageRefreshesGroup, null, null, null, null);
 	}
-	
-	public void initializeMessagesUI(EventListener<Event> messagesUI)
-	{
+
+	public void initializeMessagesUI(EventListener<Event> messagesUI) {
 		try {
 			register(messagesUI, GotMessages.class);
 			register(messagesUI, MessageAcknowledged.class);
@@ -103,8 +106,7 @@ public class TSBus extends Bus {
 		}
 	}
 
-	public void deinitializeMessagesUI(EventListener<Event> messagesUI)
-	{
+	public void deinitializeMessagesUI(EventListener<Event> messagesUI) {
 		try {
 			unregister(messagesUI, GotMessages.class);
 			unregister(messagesUI, MessageAcknowledged.class);
@@ -116,8 +118,7 @@ public class TSBus extends Bus {
 		}
 	}
 
-	public void initializeGroupsUI(EventListener<Event> groupsUI)
-	{
+	public void initializeGroupsUI(EventListener<Event> groupsUI) {
 		try {
 			register(groupsUI, GroupAdded.class);
 			register(groupsUI, GroupOrderChanged.class);
@@ -127,8 +128,7 @@ public class TSBus extends Bus {
 		}
 	}
 
-	public void deinitializeGroupsUI(EventListener<Event> groupsUI)
-	{
+	public void deinitializeGroupsUI(EventListener<Event> groupsUI) {
 		try {
 			unregister(groupsUI, GroupAdded.class);
 			unregister(groupsUI, GroupOrderChanged.class);
@@ -138,8 +138,7 @@ public class TSBus extends Bus {
 		}
 	}
 
-	public void initializeTextInputUI(EventListener<Event> textInputUI)
-	{
+	public void initializeTextInputUI(EventListener<Event> textInputUI) {
 		try {
 			register(textInputUI, Connected.class);
 		} catch (RegisterException e) {
@@ -147,8 +146,7 @@ public class TSBus extends Bus {
 		}
 	}
 
-	public void deinitializeTextInputUI(EventListener<Event> textInputUI)
-	{
+	public void deinitializeTextInputUI(EventListener<Event> textInputUI) {
 		try {
 			unregister(textInputUI, Connected.class);
 		} catch (UnregisterException e) {

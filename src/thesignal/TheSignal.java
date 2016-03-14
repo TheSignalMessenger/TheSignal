@@ -34,6 +34,7 @@ import thesignal.ui.singlegroup.StatusUI;
 import thesignal.ui.singlegroup.TSGroupUI;
 import thesignal.ui.singlegroup.TSMessagesUI;
 import thesignal.ui.singlegroup.TSTextInputUI;
+import thesignal.ui.usecase.ReceivedMessageRefreshesGroup;
 import thesignal.utils.Pair;
 import thesignal.utils.Util;
 
@@ -77,6 +78,7 @@ public class TheSignal extends JFrame {
 				injector.getInstance(ReadGroupsFromDHT.class),
 				injector.getInstance(SetupMessageReceiving.class),
 				injector.getInstance(BusUiAdapter.class),
+				injector.getInstance(ReceivedMessageRefreshesGroup.class),
 				injector.getInstance(TSMessagesUI.class),
 				injector.getInstance(TSGroupUI.class),
 				injector.getInstance(TSTextInputUI.class),
