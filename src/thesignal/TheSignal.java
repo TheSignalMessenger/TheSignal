@@ -35,6 +35,8 @@ import thesignal.ui.usecase.ReceivedMessageRefreshesGroup;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 
 public class TheSignal extends JFrame {
 	private static final long serialVersionUID = -2995079921468810238L;
@@ -62,7 +64,7 @@ public class TheSignal extends JFrame {
 			Preferences.putMe(me);
 		}
 
-		injector = Guice.createInjector();
+		injector = Guice.createInjector(new SingleDisplayModule());
 
 		{
 			// Add the Born and Mehrtürer users and the given one.
@@ -100,12 +102,13 @@ public class TheSignal extends JFrame {
 		messageInputUI = injector.getInstance(TSTextInputUI.class);
 		JTextField messageInputField = messageInputUI.getTextInputField();
 
-		messagesUI = injector.getInstance(TSMessagesUI.class);
+		messagesUI = injector.getInstance(Key.get(TSMessagesUI.class,
+				Names.named("singleGroup")));
 		JScrollPane messagesListScrollPane = messagesUI.getMessagesScrollPane();
 
 		groupsUI = injector.getInstance(TSGroupUI.class);
 		JScrollPane groupsListScrollPane = groupsUI.getGroupsScrollPane();
-		
+
 		JLabel statusLabel = injector.getInstance(StatusUI.class)
 				.getStatusLabel();
 
