@@ -22,7 +22,6 @@ import thesignal.dht.usecase.ConnectToDHT;
 import thesignal.dht.usecase.ReadGroupsFromDHT;
 import thesignal.dht.usecase.SendMessageToDHT;
 import thesignal.dht.usecase.SetupMessageReceiving;
-import thesignal.entity.BusUiAdapter;
 import thesignal.entity.Group;
 import thesignal.entity.Message;
 import thesignal.entity.User;
@@ -77,7 +76,6 @@ public class TheSignal extends JFrame {
 				injector.getInstance(SendMessageToDHT.class),
 				injector.getInstance(ReadGroupsFromDHT.class),
 				injector.getInstance(SetupMessageReceiving.class),
-				injector.getInstance(BusUiAdapter.class),
 				injector.getInstance(ReceivedMessageRefreshesGroup.class),
 				injector.getInstance(TSMessagesUI.class),
 				injector.getInstance(TSGroupUI.class),
