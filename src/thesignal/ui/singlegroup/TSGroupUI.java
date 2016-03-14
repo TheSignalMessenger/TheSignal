@@ -34,7 +34,6 @@ public class TSGroupUI {
 		groupsList.setCellRenderer(new TSGroupCellRenderer());
 
 		groupsList.addListSelectionListener(new ListSelectionListener() {
-
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				// goon: call selectGroup with id, which has to be added to groupsList
