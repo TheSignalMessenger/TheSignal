@@ -6,7 +6,9 @@ import thesignal.bus.events.Connected;
 import thesignal.manager.MeManager;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class ReadGroupsFromDHT implements EventListener<Connected> {
 	public MeManager meManager;
 

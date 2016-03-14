@@ -1,5 +1,7 @@
 package thesignal.ui.singlegroup;
 
+import com.google.inject.Inject;
+
 import thesignal.entity.Group;
 import thesignal.ui.GroupDisplayInterface;
 
@@ -9,6 +11,8 @@ public class UiSingleGroupDisplay implements GroupDisplayInterface, SelectActive
 	private TSGroupUI groupUi;
 
 	private Group activeGroup;
+	
+	@Inject
 	public UiSingleGroupDisplay(TSMessagesUI _messagesUi,
 			TSTextInputUI _textInputUi, TSGroupUI _groupUi) {
 		messagesUi = _messagesUi;

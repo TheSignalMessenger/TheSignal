@@ -19,7 +19,9 @@ import thesignal.manager.MeManager;
 import thesignal.repository.GroupRepository;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class SetupMessageReceiving implements EventListener<Connected> {
 
 	private MeManager meManager;

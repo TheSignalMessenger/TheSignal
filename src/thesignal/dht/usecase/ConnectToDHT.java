@@ -17,7 +17,9 @@ import thesignal.manager.MeManager;
 import thesignal.manager.PeerHashManager;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class ConnectToDHT implements EventListener<Event> {
 	MeManager meManager;
 	PeerHashManager peerHashManager;

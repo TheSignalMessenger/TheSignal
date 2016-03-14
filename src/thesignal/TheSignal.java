@@ -2,7 +2,6 @@ package thesignal;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -22,7 +21,6 @@ import thesignal.dht.usecase.ConnectToDHT;
 import thesignal.dht.usecase.ReadGroupsFromDHT;
 import thesignal.dht.usecase.SendMessageToDHT;
 import thesignal.dht.usecase.SetupMessageReceiving;
-import thesignal.entity.Group;
 import thesignal.entity.Message;
 import thesignal.entity.User;
 import thesignal.manager.GroupManager;
@@ -34,16 +32,11 @@ import thesignal.ui.singlegroup.TSGroupUI;
 import thesignal.ui.singlegroup.TSMessagesUI;
 import thesignal.ui.singlegroup.TSTextInputUI;
 import thesignal.ui.usecase.ReceivedMessageRefreshesGroup;
-import thesignal.utils.Pair;
-import thesignal.utils.Util;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 public class TheSignal extends JFrame {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -2995079921468810238L;
 
 	// assumes the current class is called logger
@@ -70,17 +63,6 @@ public class TheSignal extends JFrame {
 		}
 
 		injector = Guice.createInjector();
-
-		tsBus = injector.getInstance(TSBus.class);
-		tsBus.setup(injector.getInstance(ConnectToDHT.class),
-				injector.getInstance(SendMessageToDHT.class),
-				injector.getInstance(ReadGroupsFromDHT.class),
-				injector.getInstance(SetupMessageReceiving.class),
-				injector.getInstance(ReceivedMessageRefreshesGroup.class),
-				injector.getInstance(TSMessagesUI.class),
-				injector.getInstance(TSGroupUI.class),
-				injector.getInstance(TSTextInputUI.class),
-				injector.getInstance(StatusUI.class));
 
 		{
 			// Add the Born and Mehrtürer users and the given one.
@@ -114,9 +96,16 @@ public class TheSignal extends JFrame {
 		JComponent newContentPane = new JPanel(new BorderLayout());
 
 		JPanel messagesContainer = new JPanel(new BorderLayout());
-		JTextField messageInputField = initializeTextInput();
-		JScrollPane messagesListScrollPane = initializeMessagesList();
-		JScrollPane groupsListScrollPane = initializeGroupsList();
+
+		messageInputUI = injector.getInstance(TSTextInputUI.class);
+		JTextField messageInputField = messageInputUI.getTextInputField();
+
+		messagesUI = injector.getInstance(TSMessagesUI.class);
+		JScrollPane messagesListScrollPane = messagesUI.getMessagesScrollPane();
+
+		groupsUI = injector.getInstance(TSGroupUI.class);
+		JScrollPane groupsListScrollPane = groupsUI.getGroupsScrollPane();
+		
 		JLabel statusLabel = injector.getInstance(StatusUI.class)
 				.getStatusLabel();
 
@@ -126,26 +115,20 @@ public class TheSignal extends JFrame {
 		newContentPane.add(groupsListScrollPane, BorderLayout.EAST);
 		newContentPane.add(statusLabel, BorderLayout.PAGE_END);
 
+		tsBus = injector.getInstance(TSBus.class);
+		tsBus.setup(injector.getInstance(ConnectToDHT.class),
+				injector.getInstance(SendMessageToDHT.class),
+				injector.getInstance(ReadGroupsFromDHT.class),
+				injector.getInstance(SetupMessageReceiving.class),
+				injector.getInstance(ReceivedMessageRefreshesGroup.class),
+				messagesUI, groupsUI, messageInputUI,
+				injector.getInstance(StatusUI.class));
+
 		setContentPane(newContentPane);
 
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
 
 		tsBus.raise(new Started());
-	}
-
-	private JTextField initializeTextInput() {
-		messageInputUI = injector.getInstance(TSTextInputUI.class);
-		return messageInputUI.getTextInputField();
-	}
-
-	private JScrollPane initializeMessagesList() {
-		messagesUI = injector.getInstance(TSMessagesUI.class);
-		return messagesUI.getMessagesScrollPane();
-	}
-
-	private JScrollPane initializeGroupsList() {
-		groupsUI = injector.getInstance(TSGroupUI.class);
-		return groupsUI.getGroupsScrollPane();
 	}
 
 	public static void main(final String[] args) {

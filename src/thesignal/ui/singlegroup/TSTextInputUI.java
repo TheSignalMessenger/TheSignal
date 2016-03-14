@@ -28,8 +28,8 @@ public class TSTextInputUI implements EventListener<Event> {
 	public Group activeGroup;
 
 	@Inject
-	public TSTextInputUI(TSBus bus_, MeManager meManager) {
-		bus = bus_;
+	public TSTextInputUI(TSBus bus, MeManager meManager) {
+		this.bus = bus;
 		this.meManager = meManager;
 
 		mMessageInput = new JTextField();
@@ -52,7 +52,6 @@ public class TSTextInputUI implements EventListener<Event> {
 				message.state = Message.State.Sending;
 
 				SendMessage command = new SendMessage(message);
-
 				bus.handle(command);
 
 				// messagesListModel.handleEvent(dummyEvent);
